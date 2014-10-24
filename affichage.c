@@ -14,6 +14,7 @@ genTerrain(){
     //do
       //take une case autour au hasard
         //if case dans terrain (i<50 and j<50) and pas case dej take (contain(caseChemin, caseij))
+        //else le faire pour une autre case
     //while(nb de case accessible voulu)
   //completer trou par obs
   
