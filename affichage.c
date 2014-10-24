@@ -34,6 +34,19 @@ genTerrain(){
   }
 }
 
+genDepartArrivee(){
+  while(d = null and a = null){
+    random case
+    if (case not obs){
+      if (d=null){
+        d=case
+      }else{
+        a=case
+      }
+    }
+  }  
+}
+
 genObjet(){
   while(nbRessource pas attein){
     random i 0->50
