@@ -1,7 +1,7 @@
 
 
 enum Type{
-	libre, infranchissable // ,etc... (perte de ressource)
+	libre, infranchissable // perte de ressource, etc...
 };
 
 struct Case { // Majuscule ! sinon c'est la merde !
