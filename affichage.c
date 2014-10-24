@@ -5,6 +5,14 @@ genDepartArrivee();
 genObjet();
 };
 
+affichage(){
+  for (int i=0; i<50; i++){
+    for (int j=0; j<50; j++){
+      //afficher map[i][j]
+    }
+  }
+}
+
 genTerrain(){
   obs = Case(img, type);
   chemin = Case(img, type);
@@ -20,7 +28,18 @@ genTerrain(){
   
   for (int i=0; i<50; i++){
     for (int j=0; j<50; j++){
-      map[i][j] = obs;
+      if (is in terrain and not chemin)
+        map[i][j] = obs;
+    }
+  }
+}
+
+genObjet(){
+  while(nbRessource pas attein){
+    random i 0->50
+    random j 0->50
+    if (map[i][j] interrain){
+      map.ressource(i,j)
     }
   }
 }
