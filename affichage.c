@@ -10,7 +10,7 @@ genTerrain(){
   for (int i=0; i<50; i++){
     for (int j=0; j<50; j++){
       map[x] = Case(i,j);
-      x++
+      x++;
     }
   }
 }
