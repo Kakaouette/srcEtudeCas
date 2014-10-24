@@ -9,6 +9,7 @@ affichage(){
   for (int i=0; i<50; i++){
     for (int j=0; j<50; j++){
       //afficher map[i][j]
+        //afficher map[i][j]->case->image
     }
   }
 }
