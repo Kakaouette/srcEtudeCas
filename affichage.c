@@ -1,5 +1,5 @@
-struct affichage{
-void affichage(); // appellé pour générer le tout (ajouter argument pour plus d'options)
+struct Affichage{
+affichage(); // appellï¿½ pour gï¿½nï¿½rer le tout (ajouter argument pour plus d'options)
 genTerrain();
 genDepartArrivee();
 genObjet();
