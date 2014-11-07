@@ -2,7 +2,7 @@
 
 struct Ressource{
 std::string image;
-// int valeur;
+/// int valeur;
 int position[2];
 int vue;
 int pass;

@@ -11,5 +11,5 @@ struct Jeu{
 Joueur J1 = joueur.newJoueur(); // Aucune id�e.
 Case* map[][];
 Ressource* ressources[];
-execution(); // Appell� depuis le main. Cr�� affichage/joueur/etc... // options � ajouter en argument
+execution(); // Appell� depuis le main. Cr�� affichage/joueur/etc... // options a ajouter en argument
 };

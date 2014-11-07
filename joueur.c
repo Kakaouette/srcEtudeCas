@@ -1,4 +1,4 @@
-/*
+/**
 long tab[20];
 long arrete = 0x120A05;
 trier(tab, arrete);
