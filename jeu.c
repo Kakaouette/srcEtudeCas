@@ -8,9 +8,8 @@ void resetRessources(Ressource*[] ressources){
 }
 
 struct Jeu{
-joueur J1;
-J1 = joueur.newJoueur(); // Aucune idée.
-Case*[][] map;
-ressource*[] ressources;
-execution(); // Appellé depuis le main. Créé affichage/joueur/etc... // options à ajouter en argument
+Joueur J1 = joueur.newJoueur(); // Aucune idï¿½e.
+Case* map[][];
+Ressource* ressources[];
+execution(); // Appellï¿½ depuis le main. Crï¿½ï¿½ affichage/joueur/etc... // options ï¿½ ajouter en argument
 };
