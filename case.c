@@ -1,11 +1,10 @@
-#include <string.h>
+
 
 enum Type{
 	libre, infranchissable // ,etc...
 };
 
 struct Case { // Majuscule ! sinon c'est la merde !
-std::string image; // Addr image
+string image; // Addr image
 Type type; //
-// Case*[4] entourage; // Plus facile pour l'algo ! (gauche-droite-haut-bas)
-}; // Pour ï¿½viter d'ï¿½crire toujours "struct _Case" !
+}Case; // Pour éviter d'écrire toujours "struct _Case" !
