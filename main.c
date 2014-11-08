@@ -1,84 +1,70 @@
 #include <stdio.h>
+#include <stdlib.h>
+
 #include <SDL.h>
+#include <SDL_image.h>
 
-#define WIDTH 640
-#define HEIGHT 480
-#define BPP 4
-#define DEPTH 32
+#include "Jeu.h"
+const int NB_CASE_X = 20;
+const int NB_CASE_Y = 15;
+//attributs de la feuille de sprites
+const int SPRITE_WIDTH = 32;
+const int SPRITE_HEIGHT = 32;
+//nombre dimage: 512/32=16, 16*16
 
-void setpixel(SDL_Surface *screen, int x, int y, Uint8 r, Uint8 g, Uint8 b)
+void pause();
+
+int main(int argc, char *argv[])
 {
-    Uint32 *pixmem32;
-    Uint32 colour;
 
-    colour = SDL_MapRGB( screen->format, r, g, b );
+    //attributs de l'écran
+    const int SCREEN_WIDTH = NB_CASE_X*SPRITE_WIDTH;//640
+    const int SCREEN_HEIGHT = NB_CASE_Y*SPRITE_HEIGHT;//480
+    const int SCREEN_BPP = 32;
 
-    pixmem32 = (Uint32*) screen->pixels  + y + x;
-    *pixmem32 = colour;
-}
+    SDL_Surface *ecran = NULL; //screen
 
-
-void DrawScreen(SDL_Surface* screen, int h)
-{
-    int x, y, ytimesw;
-
-    if(SDL_MUSTLOCK(screen))
-    {
-        if(SDL_LockSurface(screen) < 0) return;
-    }
-
-    for(y = 0; y < screen->h; y++ )
-    {
-        ytimesw = y*screen->pitch/BPP;
-        for( x = 0; x < screen->w; x++ )
-        {
-            setpixel(screen, x, ytimesw, (x*x)/256+3*y+h, (y*y)/256+x+h, h);
-        }
-    }
-
-    if(SDL_MUSTLOCK(screen)) SDL_UnlockSurface(screen);
-
-    SDL_Flip(screen);
-}
+    SDL_Init(SDL_INIT_VIDEO);
 
 
-int main(int argc, char* argv[])
-{
-    SDL_Surface *screen;
+    ecran = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_HWSURFACE); //afficher fenetre
+    SDL_WM_SetCaption("La cueillette", NULL); //titre de la fenetre
+    SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 119, 181, 254)); //couleur de fond de la fenetre
+
+    /**Initialisation du jeu*/
+    Jeu *game;
+    //genTerrain(game->map);
+    //genObjet(3, game);
+    /**Affichage*/
+    Uint8 typeEvent=0;
     SDL_Event event;
-
-    int keypress = 0;
-    int h=0;
-
-    if (SDL_Init(SDL_INIT_VIDEO) < 0 ) return 1;
-
-    if (!(screen = SDL_SetVideoMode(WIDTH, HEIGHT, DEPTH, SDL_FULLSCREEN|SDL_HWSURFACE)))
-    {
-        SDL_Quit();
-        return 1;
+    while(typeEvent!=SDL_QUIT){
+        afficher(ecran, game);
+        do{
+            SDL_WaitEvent(&event);
+            typeEvent = event.type;
+        }while(typeEvent!=SDL_KEYDOWN && typeEvent!=SDL_QUIT);
     }
 
-    while(!keypress)
-    {
-         DrawScreen(screen,h++);
-         while(SDL_PollEvent(&event))
-         {
-              switch (event.type)
-              {
-                  case SDL_QUIT:
-	              keypress = 1;
-	              break;
-                  case SDL_KEYDOWN:
-                       keypress = 1;
-                       break;
-              }
-         }
-    }
+    //pause();
 
-    SDL_Quit();
+    SDL_Quit(); //Arrêt de la SDL
 
     return 0;
 }
 
+void pause(){ // Mise en pause du programme
+    int continuer = 1;
+    SDL_Event event;
 
+    while (continuer)
+    {
+        SDL_WaitEvent(&event);
+        switch(event.type)
+        {
+            case SDL_QUIT:
+                continuer = 0;
+        }
+    }
+}
 
