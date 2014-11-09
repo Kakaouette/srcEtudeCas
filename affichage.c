@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 #include <time.h>
 #include <math.h>
 
@@ -24,8 +25,7 @@ SDL_Rect decoupage(int x, int y){
     return clip;
 }
 
-void afficher(SDL_Surface * ecran, Jeu * game)
-{
+void afficher(SDL_Surface * ecran, Jeu * game, int nbRessource){
     //attributs de la feuille de sprites
     const int SHEET_WIDTH = 512, SHEET_HEIGHT = 512;
     //nombre dimage: 512/32=16, 16*16
@@ -43,20 +43,7 @@ void afficher(SDL_Surface * ecran, Jeu * game)
     SDL_Rect herbe = decoupage(15, 1);
     SDL_Rect perso = decoupage(10,12);
     SDL_Rect gems = decoupage(10,9);
-
-
-    Case cs[NB_CASE_X][NB_CASE_Y];
-    Case* c[NB_CASE_X][NB_CASE_Y];
-
-    int i,j;
-
-    for (i=0; i<NB_CASE_X;i++){
-        for (j=0; j<NB_CASE_Y;j++){
-            //cs[i][j].type = libre;
-            c[i][j]=&cs[i][j];
-        }
-    }
-
+    SDL_Rect imgArrivee = decoupage(4,4);//8,13
 
 
     int y,x;
@@ -65,20 +52,35 @@ void afficher(SDL_Surface * ecran, Jeu * game)
     /**affichage map*/
     for (y=0;y<NB_CASE_Y;y++){
         for (x=0;x<NB_CASE_X;x++){
-            if (c[x][y]->type == libre){
-                c[x][y]->image = &terre;
-            }else{
-                c[x][y]->image = &herbe;
-            } //remplacer "c" par "game->map"
-            apply_surface( x*SPRITE_WIDTH, y*SPRITE_HEIGHT, textures, ecran, c[x][y]->image ); //0->(SCREEN_WIDTH/SPRITE_WIDTH)-1
+            if (game->map[x][y]->type == libre){
+                game->map[x][y]->image = &terre;
+            }else if (game->map[x][y]->type == infranchissable){
+                game->map[x][y]->image = &herbe;
+            }
+            apply_surface(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, textures, ecran, game->map[x][y]->image); //0->(SCREEN_WIDTH/SPRITE_WIDTH)-1
+            if(game->map[x][y]->arrivee == pow(2,0)){
+                apply_surface(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, textures, ecran, &imgArrivee);
+            }
         }
     }
+    /**affichage ressources*/
+    for (x=0;x<nbRessource;x++){//sizeof(game->ressources)/(sizeof(Ressource))
+        apply_surface(game->ressources[x]->position[0]*SPRITE_WIDTH, game->ressources[x]->position[1]*SPRITE_HEIGHT, textures, ecran, game->ressources[x]->image);
+    }
     /**affichage perso*/
-    //apply_surface( p1->i*SPRITE_WIDTH, p1->j*SPRITE_HEIGHT, textures, ecran, &p1->image );
-
+    apply_surface(game->J1.position[0]*SPRITE_WIDTH, game->J1.position[1]*SPRITE_HEIGHT, textures, ecran, game->J1.image);
+    /**affichage score*/
+    TTF_Init(); //Démarrage de SDL_ttf
+    TTF_Font *police = TTF_OpenFont("Fonts/OCRAStd.otf", 20); //Charger la police
+    SDL_Color black = {0,0,0};
+    SDL_Surface* texte = TTF_RenderText_Blended(police, "Score: 0", black);
+    apply_surface(0*SPRITE_WIDTH, 0*SPRITE_HEIGHT, texte, ecran, NULL);
+    TTF_CloseFont(police); //Fermer la police
+    TTF_Quit(); //Arrêt de SDL_ttf
 
     SDL_Flip(ecran); // Mise à jour de l'écran
 
+    SDL_FreeSurface(texte); // On libère la surface
     SDL_FreeSurface(textures); // On libère la surface
 }
 
@@ -96,8 +98,7 @@ int rand_a_b(int a, int b){
     return rand() % (b - a) + a;
 }
 
-void genTerrain(Case* map[][NB_CASE_Y]){
-    int nbCaseLibreVoulu = 1/3*(NB_CASE_X*NB_CASE_Y);
+void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
     int nbCaseTake = 0;
 
     int i,j;
@@ -109,7 +110,6 @@ void genTerrain(Case* map[][NB_CASE_Y]){
     }
     //generation chemin coherent
     //case de depart au hasard
-    srand(time(NULL)); // initialisation de rand
 	int	dX = rand_a_b(0,20);
 	int	dY = rand_a_b(0,15);
 	map[dX][dY]->type = libre; //rendre la case libre
@@ -174,11 +174,10 @@ void genTerrain(Case* map[][NB_CASE_Y]){
     }while(nbCaseTake < nbCaseLibreVoulu); //nb de case accessible voulu
 }
 
-void genDepartArrivee(Case* map[][NB_CASE_Y]){
+void genDepartArrivee(Case** (*map), Jeu * game){
 
     char depart = 0, arrivee = 0; //bool existe pas en c, c dla merde
 
-    srand(time(NULL)); // initialisation de rand
     int	dX, dY;
     do{
         //case au hasard
@@ -186,11 +185,18 @@ void genDepartArrivee(Case* map[][NB_CASE_Y]){
         dY = rand_a_b(0,NB_CASE_Y);
 
         if (map[dX][dY]->type == libre){ //si case libre
-            if (depart){
+            if (depart == 0){
                 map[dX][dY]->depart = pow(2,0);
+
+                game->J1.depart[0] = dX;
+                game->J1.depart[1] = dY;
+                game->J1.position[0] = dX;
+                game->J1.position[1] = dY;
                 depart = 1;
             }else{
                 map[dX][dY]->arrivee = pow(2,0);
+                game->J1.arrivee[0] = dX;
+                game->J1.arrivee[1] = dY;
                 arrivee = 1;
             }
         }
@@ -199,7 +205,8 @@ void genDepartArrivee(Case* map[][NB_CASE_Y]){
 
 void genObjet(int nbRessourceVoulu, Jeu * game){
     int nbCaseTake = 0;
-    srand(time(NULL)); // initialisation de rand
+    SDL_Rect gems = decoupage(10,9);
+
 
     int x,y;
 
@@ -208,8 +215,35 @@ void genObjet(int nbRessourceVoulu, Jeu * game){
             x= rand_a_b(0,NB_CASE_X);
             y= rand_a_b(0,NB_CASE_Y);
         }while(game->map[x][y]->type != libre);
+        //game->ressources[nbCaseTake]->image = &gems; //bug, naffiche rien
         game->ressources[nbCaseTake]->position[0]=x;
         game->ressources[nbCaseTake]->position[1]=y;
         nbCaseTake++;
     }//pb pas de verif si case deja une ressource
+}
+
+
+
+int* init_sans_doublons(int a, int b){
+	int taille = b-a;
+	int* resultat=malloc((taille)*sizeof (int));
+	int i=0;
+	// On remplit le tableau de manière à ce qu'il soit trié
+	for(i = 0; i< taille; i++){
+		resultat[i]=i+a;
+	}
+	return resultat;
+}
+void melanger(int* tableau, int taille){
+	int i=0;
+	int nombre_tire=0;
+	int temp=0;
+
+	for(i = 0; i< taille;i++){
+		nombre_tire=rand_a_b(0,taille);
+		// On échange les contenus des cases i et nombre_tire
+		temp = tableau[i];
+		tableau[i] = tableau[nombre_tire];
+		tableau[nombre_tire]=temp;
+	}
 }

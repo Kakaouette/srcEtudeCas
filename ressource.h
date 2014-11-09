@@ -4,7 +4,7 @@
 
 
 typedef struct Ressource{
-    SDL_Rect image;
+    SDL_Rect* image;
     /// int valeur;
     int position[2];
     int vue;

@@ -3,14 +3,18 @@
 
 #include "Case.h"
 #include "ressource.h"
+#include "joueur.h"
+
+extern const int NB_CASE_X;
+extern const int NB_CASE_Y;
 
 typedef struct Jeu{
-    Case* **map;//[NB_CASE_X][NB_CASE_Y];
-    //Joueur J1 = joueur.newJoueur(); // Aucune id�e.
-    Ressource* ressources[];
-    //execution(); // Appell� depuis le main. Cr�� affichage/joueur/etc... // options a ajouter en argument
+    Case** (*map);//[NB_CASE_X][NB_CASE_Y];
+    Joueur J1;// = joueur.newJoueur(); // Aucune id�e.
+    Ressource* (*ressources);
 }Jeu;
 
+void execution();
 void new_Game(Jeu* game);
 void free_Jeu(Jeu *game);
 
