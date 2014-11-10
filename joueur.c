@@ -1,19 +1,25 @@
-/**
-long tab[20];
-long arrete = 0x120A05;
-trier(tab, arrete);
-*/
+#include "joueur.h"
+
+#include <string.h>
+#include <math.h>
+#include "case.h"
+#include "arrete.h"
+
+// X et Y pour une meilleure lecture
+#define X 0 // X pour l'abscisse position[X] premier element du tableau
+#define Y 1 // Y pour l'ordonnee position[Y] second element du tableau
 
 
-long[] trier(long[] tab, long aRanger){
-    memset();
-    short i, j, temp;
-    for(i = 0 ; i < tab.length ; i++){
+void trier(Arrete* tab[], Arrete *aRanger){
+    ///memset();
+    //short i, j, temp;
+    ///!!! Pas de "length" ou "size"
+    /*for(i = 0 ; i < tab.length ; i++){
         if(tab[i]==0){
             tab[i] = aRanger;
             break;
         }
-        if((tab[i]&0xFF)<(aRanger&0xFF)){
+        if((tab[i]->D)<(aRanger->D)){
             for(j = i; j < tab.length ; j++){
                 if(tab[i]==0){
                     tab[i] = aRanger;
@@ -25,42 +31,26 @@ long[] trier(long[] tab, long aRanger){
             break;
         }
     }
-    return tab;
+    return tab;*/
 }
 
-void algorithmeSansContrainte(Joueur joueur, Ressource*[] ressources){
+void algorithmeSansContrainte(Joueur joueur, Ressource* ressources[]){
 
 };
 
-#define nombreTypeRessource 1
-#define X 0
-#define Y 1
-#define positionX position[X]
-#define positionY position[Y]
-#define positionX(x) position[X] = x
-#define positionY(y) position[Y] = y
-#include <string.h>
-#include <math.h>
-struct Joueur{ // Acc�s � "map" pour acc�der aux cases sans garder le truc en fond
-    int depart[2];
-    int arrivee[2];
-    std::string image;
-    int position[2];
-    Ressource* score[];
-//int[nombreTypeRessource] score; // 0-banane, 1-fraise, 2-orange, etc... #define fraise 0 // #define ptsFraise 1 (ou 5) ?
-/*
-// "Constructeur" !
-Voir exempleConstructeur.txt
-*/
-};
 char jouer(); // Un tour (pour le mode deux joueurs)
-int deplacement(Joueur* player, int x, int y) { //Une case
-    int depx = x - player->position[X];
-    int depy = y - player->position[Y];
+
+///!!! On donne la map en parametre. Mais chez moi y'a un probleme
+///!!! il me donne "type incomplet" sur tableau à deux dimensions.
+///!!! Envisager Case*** (ouais c'est moche), ou include de jeu ?
+short deplacement(Joueur* player, Case* map[], short x, short y) { //Une case
+    short depx = x - player->position[0];
+    short depy = y - player->position[1];
     if (abs(depy) > abs(depx)) {
         if (depy != 0) {
-            int sign = depy/abs(depy);
-            Case* nextCase = jeu.map[player->position[X]][player->position[Y] + sign];
+            short sign = depy/abs(depy);
+            ///!!! "jeu" est inconnu, il faut donner la map ou le jeu en param
+            Case* nextCase = NULL; //jeu.map[player->position[X]][player->position[Y] + sign];
             switch (nextCase->type) {
                 case libre :
                     player->position[Y] += sign;
@@ -73,8 +63,9 @@ int deplacement(Joueur* player, int x, int y) { //Une case
         }
     } else {
         if (depx != 0) {
-            int sign = depx/abs(depx);
-            Case* nextCase = jeu.map[player->position[X] + sign][player->position[Y]];
+            short sign = depx/abs(depx);
+            ///!!! Meme souci "jeu" et "map"
+            Case* nextCase = NULL;//jeu.map[player->position[X] + sign][player->position[Y]];
             switch (nextCase->type) {
                 case libre :
                     player->position[X] += sign;
@@ -85,13 +76,11 @@ int deplacement(Joueur* player, int x, int y) { //Une case
         }
     }
 }
-    void algorithme() {
+
+void algorithme() {
     Ressource* objectif;
     Joueur* player;
     int depy = objectif->position[Y] - player->position[Y];
     int depx = objectif->position[X] - player->position[X];
     int dep = abs(depx) + abs(depy);
-}
-Joueur* newJoueur() {
-
 }

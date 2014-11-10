@@ -1,7 +1,7 @@
 #ifndef RESSOURCE_H
 #define RESSOURCE_H
 
-
+#include <SDL_image.h>
 
 typedef struct Ressource{
     SDL_Rect* image;
