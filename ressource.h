@@ -3,10 +3,11 @@
 
 #include <SDL_image.h>
 
+
 typedef struct Ressource{
     SDL_Rect* image;
     /// int valeur;
-    int position[2];
+    char position[2];//?choisir mettre ressource sur case ou mettre position dans ressource?
     int vue;
     int pass;
     int rendu;

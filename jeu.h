@@ -5,13 +5,14 @@
 #include "ressource.h"
 #include "joueur.h"
 
-extern const int NB_CASE_X;
-extern const int NB_CASE_Y;
+
+#define NB_CASE_X  20
+#define NB_CASE_Y  15
 
 typedef struct Jeu{
-    Case** (*map);//[NB_CASE_X][NB_CASE_Y];
+    Case** (*map);
     Joueur J1;// = joueur.newJoueur(); // Aucune id�e.
-    Ressource* (*ressources);
+    Ressource* (*ressources);//?choisir 1:mettre ressource sur case ou 2:mettre position dans ressource?->1:enlever tableau de ressource
 }Jeu;
 
 void execution();

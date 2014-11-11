@@ -1,11 +1,9 @@
 
-#include <SDL_image.h>
 #include "Case.h"
 #include "Jeu.h"
-#include "ressource.h"
 
-extern const int NB_CASE_X;
-extern const int NB_CASE_Y;
+
+Case cs[NB_CASE_X][NB_CASE_Y];
 
 /*void resetRessources(Ressource* ressources[]){
     int i;
@@ -20,10 +18,20 @@ void execution(){} // Appell� depuis le main. Cr�� affichage/joueur/etc...
 
 
 void new_Game(Jeu* game){
+    // allocation
     int i;
     game->map = malloc(NB_CASE_X * sizeof(*game->map));
     for (i=0 ; i < NB_CASE_X ; i++){
-        game->map[i] = malloc(NB_CASE_Y * sizeof(**game->map));//(sizeof(SDL_Rect)+3*sizeof(char))
+        game->map[i] = malloc(NB_CASE_Y * sizeof(**game->map));
+    }
+    //initialisation
+    int j;
+    for (i=0; i<NB_CASE_X;i++){
+        for (j=0; j<NB_CASE_Y;j++){
+            cs[i][j].depart = 0;
+            cs[i][j].arrivee = 0;
+            game->map[i][j] = &cs[i][j];
+        }
     }
 }
 
@@ -35,4 +43,6 @@ void free_Jeu(Jeu *game){
         free (game->map[i]);
     }
     free(game->map);
+
+    free(game->ressources);
 }

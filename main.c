@@ -5,17 +5,12 @@
 #include <SDL_image.h>
 
 #include "Jeu.h"
+#include "affichage.h"
 
 SDL_Rect decoupage(int x, int y);
-
-const int NB_CASE_X = 20;
-const int NB_CASE_Y = 15;
-//attributs de la feuille de sprites
-const int SPRITE_WIDTH = 32;
-const int SPRITE_HEIGHT = 32;
-//nombre dimage: 512/32=16, 16*16
-
-void pause();
+extern const SDL_Rect perso;
+extern const SDL_Rect persoV2;
+extern const SDL_Rect gems;
 
 int main(int argc, char *argv[])
 {
@@ -37,60 +32,49 @@ int main(int argc, char *argv[])
 
     /**Initialisation du jeu*/
     Jeu jeu;
-    Jeu *game = &jeu;
-    new_Game(game);// allocation
-    //initialisation
-    int i,j;
-    Case cs[NB_CASE_X][NB_CASE_Y];
+    new_Game(&jeu);// allocation + initialisation
 
-
-    for (i=0; i<NB_CASE_X;i++){
-        for (j=0; j<NB_CASE_Y;j++){
-            cs[i][j].depart = 0;
-            cs[i][j].arrivee = 0;
-            game->map[i][j] = &cs[i][j];
-        }
-    }
-
-    SDL_Rect perso = decoupage(10,12);
-    game->J1.image = &perso;
-
-
-    SDL_Rect gems = decoupage(10,9);
-
-    int nbRessource = 3;
+    int nbRessource = 3, j;
     Ressource r[nbRessource];
-    game->ressources = malloc(nbRessource * sizeof(*game->ressources));//allocation
+    jeu.ressources = malloc(nbRessource* sizeof(Ressource));//allocation
     //initialisation
     for (j=0; j<nbRessource;j++){
-        game->ressources[j] = &r[j];
-        game->ressources[j]->image = &gems;
+        jeu.ressources[j] = &r[j];
+        jeu.ressources[j]->image = &gems;
     }
 
-
-    genTerrain((NB_CASE_X*NB_CASE_Y)/3,game->map);//creation du terrain
-    genObjet(nbRessource, game);
-    genDepartArrivee(game->map, game);
-    /**Affichage*/
-    Uint8 typeEvent=0;
+    char choix = 0;
     SDL_Event event;
-    int tempsActuel = 0, tempsPrecedent = 0;
-    while(typeEvent!=SDL_QUIT){
-        afficher(ecran, game, nbRessource);
+    int tempsActuel, tempsPrecedent;
+    char anciennePosition[2], dplJoueur[2];
+
+    do{
+        /**Initialisation*/
+        jeu.J1.image = &perso; //choix du joueur//peut etre different a chaque partie
+        genTerrain((NB_CASE_X*NB_CASE_Y)/3,jeu.map); //creation du terrain
+        genObjet(nbRessource, &jeu);
+        genDepartArrivee(&jeu);
+        anciennePosition[0] = jeu.J1.position[0];
+        anciennePosition[1] = jeu.J1.position[1];
+        jeu.J1.orientation = bas;
         do{
-            tempsActuel = SDL_GetTicks();
-            SDL_WaitEvent(&event);
-            typeEvent = event.type;
-            if (tempsActuel - tempsPrecedent >= 100){ // Si 100 ms au moins se sont écoulées
-                tempsPrecedent = tempsActuel; //maj tempsPrecedent
-                break;
-            }
-        }while(typeEvent!=SDL_KEYDOWN && typeEvent!=SDL_QUIT);
+            dplJoueur[0] = jeu.J1.position[0] - anciennePosition[0];
+            dplJoueur[1] = jeu.J1.position[1] - anciennePosition[1];
 
+            /**Affichage*/
+            afficher(ecran, &jeu, nbRessource, dplJoueur);
 
-        //dpl joueur
-    }
+            anciennePosition[0] = jeu.J1.position[0];
+            anciennePosition[1] = jeu.J1.position[1];
 
+            choix = gestionMenu(ecran, &jeu, nbRessource);
+
+            //dpl joueur
+            jeu.J1.position[0] = jeu.J1.position[0]+1;
+        }while(choix!=1 && choix!=3); //&& game->J1.score[0] < nbRessource //ttes les ressources sont ramassees //fin de partie
+    }while (choix!=1); //rejouer
+
+    free_Jeu(&jeu); //désallocation
     SDL_Quit(); //Arrêt de la SDL
 
     return 0;
