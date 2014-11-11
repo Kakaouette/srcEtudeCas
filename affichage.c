@@ -8,10 +8,10 @@
 #include "Case.h"
 #include "ressource.h"
 #include "affichage.h"
-extern Case cs[NB_CASE_X][NB_CASE_Y];
 
 //declaration des images//Les différentes parties de la feuille de sprites qui vont être blittés
-const SDL_Rect perso = {9*SPRITE_WIDTH,12*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};//6,8
+const SDL_Rect araignee = {9*SPRITE_WIDTH,12*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};
+const SDL_Rect squelette = {6*SPRITE_WIDTH,8*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};
 const SDL_Rect persoV2 = {0*SPRITE_WIDTH,0*SPRITE_HEIGHT, SPRITE_WIDTH, 48};
 const SDL_Rect terre = {11*SPRITE_WIDTH,4*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};
 const SDL_Rect imgHerbe = {15*SPRITE_WIDTH,1*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};
@@ -20,7 +20,7 @@ const SDL_Rect imgArrivee = {4*SPRITE_WIDTH,4*SPRITE_HEIGHT, SPRITE_WIDTH, SPRIT
 
 
 
-void afficher(SDL_Surface * ecran, Jeu * game, int nbRessource, char dplJoueur[2]){
+void afficher(SDL_Surface * ecran, Jeu * game, char dplJoueur[2]){
     //Les surfaces
     SDL_Surface *charset =  IMG_Load(pathNameTileset); //load le charset//Image/Yoda.png
 
@@ -40,9 +40,9 @@ void afficher(SDL_Surface * ecran, Jeu * game, int nbRessource, char dplJoueur[2
     int nbImageAnim = 3;
     for (y=1; y<=nbImageAnim; y++){
         /**affichage map*/
-        afficherMap(ecran, game->map);
+        afficherMap(ecran, game);
         /**affichage ressources*/
-        afficherRessources(ecran, game->ressources, nbRessource);
+        afficherRessources(ecran, game);
         /**affichage perso*/
         //changement clip
         if (dplJoueur[0]!=0 || dplJoueur[1]!=0){
@@ -65,23 +65,18 @@ void afficher(SDL_Surface * ecran, Jeu * game, int nbRessource, char dplJoueur[2
 
     SDL_FreeSurface(charset); // On libère la surface
 }
-void afficherMap(SDL_Surface * ecran, Case** (*map)){
+void afficherMap(SDL_Surface * ecran, Jeu * game){
     TTF_Init(); //Démarrage de SDL_ttf
     SDL_Surface *textures =  IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png"); //load le tileset
     SDL_Color white = {255,255,255};
     TTF_Font *police = TTF_OpenFont("Fonts/OCRAStd.otf", 20); //Charger la police
     SDL_Surface* texte;
     char y,x;
-    for (y=0;y<NB_CASE_Y;y++){
-        for (x=0;x<NB_CASE_X;x++){
-            if (map[x][y]->type == libre){
-                map[x][y]->image = &terre;
-            }else if (map[x][y]->type == infranchissable){
-                map[x][y]->image = &imgHerbe;
-            }
-            apply_surface(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, textures, ecran, map[x][y]->image); //0->(SCREEN_WIDTH/SPRITE_WIDTH)-1
+    for (y=0;y<game->nbCaseY;y++){
+        for (x=0;x<game->nbCaseX;x++){
+            apply_surface(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, textures, ecran, game->map[x][y]->image); //0->(SCREEN_WIDTH/SPRITE_WIDTH)-1
             /**affichage case d'arrivee*/
-            if(map[x][y]->arrivee == pow(2,0)){
+            if(game->map[x][y]->arrivee == pow(2,0)){
                 apply_surface(x*SPRITE_WIDTH, y*SPRITE_HEIGHT, textures, ecran, &imgArrivee);
                 rectangle(x*SPRITE_WIDTH,y*SPRITE_HEIGHT,SPRITE_WIDTH, SPRITE_HEIGHT, white, ecran); //contour de la case
                 texte = TTF_RenderText_Blended(police, "A", white);
@@ -111,11 +106,11 @@ void afficherScore(SDL_Surface * ecran, Jeu * game){
     SDL_FreeSurface(texte); // On libère la surface
     TTF_Quit(); //Arrêt de SDL_ttf
 }
-void afficherRessources(SDL_Surface * ecran, Ressource* (*ressources), int nbRessource){
-    SDL_Surface *textures =  IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png"); //load le tileset
+void afficherRessources(SDL_Surface * ecran, Jeu * game){
+    SDL_Surface *textures =  IMG_Load(pathNameTileset); //load le tileset
     int x;
-    for (x=0;x<nbRessource;x++){//sizeof(ressources)/sizeof(ressources[0])
-        apply_surface(ressources[x]->position[0]*SPRITE_WIDTH, ressources[x]->position[1]*SPRITE_HEIGHT, textures, ecran, ressources[x]->image);
+    for (x=0;x<game->nbRessource;x++){//sizeof(ressources)/sizeof(ressources[0])
+        apply_surface(game->ressources[x]->position[0]*SPRITE_WIDTH, game->ressources[x]->position[1]*SPRITE_HEIGHT, textures, ecran, game->ressources[x]->image);
     }
     SDL_FreeSurface(textures); // On libère la surface
 }
@@ -149,7 +144,7 @@ void afficherMenuRejouer(SDL_Surface * ecran){
     SDL_Flip(ecran); // Mise à jour de l'écran
 
 }
-char gestionMenu(SDL_Surface * ecran, Jeu * game, int nbRessource){
+char gestionMenu(SDL_Surface * ecran, Jeu * game){
     char dplJoueur[2];
     char choix = 0;
     SDL_Event event;
@@ -180,7 +175,7 @@ char gestionMenu(SDL_Surface * ecran, Jeu * game, int nbRessource){
                                     break;
                             }
                         }while(choix!=4 && choix!=1 && choix!=3);
-                        if(choix!=3){dplJoueur[0] = 0;dplJoueur[1] = 0;afficher(ecran, game, nbRessource, dplJoueur);}
+                        if(choix!=3){dplJoueur[0] = 0;dplJoueur[1] = 0;afficher(ecran, game, dplJoueur);}
 
                 }else if(event.key.keysym.sym == SDLK_r){choix = 3;}else{choix = 2;} //key autre que escape
             }else if (event.type == SDL_QUIT){choix = 1;} //fermer
@@ -206,24 +201,26 @@ void apply_surface( int x, int y, SDL_Surface* source, SDL_Surface* destination,
 }
 
 
-void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
+void genTerrain(int nbCaseLibreVoulu, Jeu * game){
     int nbCaseTake = 0;
 
     char i,j;
 
-    for (i=0; i<20; i++){
-        for (j=0; j<15; j++){
+    for (i=0; i<game->nbCaseX; i++){
+        for (j=0; j<game->nbCaseY; j++){
             //initialisation
-            map[i][j]->depart = 0;
-            map[i][j]->arrivee = 0;
-            map[i][j]->type = infranchissable; //rendre la case infranchissable
+            game->map[i][j]->depart = 0;
+            game->map[i][j]->arrivee = 0;
+            game->map[i][j]->type = infranchissable; //rendre la case infranchissable
+            game->map[i][j]->image = &imgHerbe; //maj image
         }
     }
     //generation chemin coherent
     //case de depart au hasard
-	char dX = rand_a_b(0,20);
-	char dY = rand_a_b(0,15);
-	map[dX][dY]->type = libre; //rendre la case libre
+	char dX = rand_a_b(0,game->nbCaseX);
+	char dY = rand_a_b(0,game->nbCaseY);
+	game->map[dX][dY]->type = libre; //rendre la case libre
+    game->map[dX][dY]->image = &terre; //maj image
     nbCaseTake ++;
 
         char xx,yy,nb, nbAnc;
@@ -232,14 +229,14 @@ void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
         nb=0;
         for (xx = -1; xx <= 1; xx++) {
 			yy = abs(xx)-1;
-			if (((dX + xx)>=0) && ((dX + xx)<20) && ((dY + yy)>=0) && ((dY + yy)<15)) {
-			    if(map[dX + xx][dY + yy]->type != libre){
+			if (((dX + xx)>=0) && ((dX + xx)<game->nbCaseX) && ((dY + yy)>=0) && ((dY + yy)<game->nbCaseY)) {
+			    if(game->map[dX + xx][dY + yy]->type != libre){
                     nb++;
 			    }
 			}
 			yy = 1 - abs(xx);
-			if (yy != abs(xx)-1 && (dX + xx)>=0 && (dX + xx)<20 && (dY + yy)>=0 && (dY + yy)<15) {
-			    if(map[dX + xx][dY + yy]->type != libre){
+			if (yy != abs(xx)-1 && (dX + xx)>=0 && (dX + xx)<game->nbCaseX && (dY + yy)>=0 && (dY + yy)<game->nbCaseY) {
+			    if(game->map[dX + xx][dY + yy]->type != libre){
                     nb++;
 			    }
 			}
@@ -247,10 +244,10 @@ void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
         nbAnc = nb;
 		if(nbAnc == 0){
             do{
-                dX = rand_a_b(0,20);
-                dY = rand_a_b(0,15);
+                dX = rand_a_b(0,game->nbCaseX);
+                dY = rand_a_b(0,game->nbCaseY);
 
-            }while(map[dX][dY]->type != libre);
+            }while(game->map[dX][dY]->type != libre);
 		}
         }while(nbAnc == 0);
 
@@ -258,8 +255,8 @@ void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
         //case valide a coté de la case depart
         for ( xx = -1; xx <= 1; xx++) {
 			yy = abs(xx)-1;
-			if ((dX + xx)>=0 && (dX + xx)<20 && (dY + yy)>=0 && (dY + yy)<15) {
-			    if(map[dX + xx][dY + yy]->type != libre){
+			if ((dX + xx)>=0 && (dX + xx)<game->nbCaseX && (dY + yy)>=0 && (dY + yy)<game->nbCaseY) {
+			    if(game->map[dX + xx][dY + yy]->type != libre){
 
 			    nb--;
 			    q[nb][0] = dX + xx;
@@ -267,8 +264,8 @@ void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
 			    }
 			}
 			yy = 1 - abs(xx);
-			if (yy != abs(xx)-1 && (dX + xx)>=0 && (dX + xx)<20 && (dY + yy)>=0 && (dY + yy)<15) {
-			    if(map[dX + xx][dY + yy]->type != libre){
+			if (yy != abs(xx)-1 && (dX + xx)>=0 && (dX + xx)<game->nbCaseX && (dY + yy)>=0 && (dY + yy)<game->nbCaseY) {
+			    if(game->map[dX + xx][dY + yy]->type != libre){
 
 			    nb--;
 			    q[nb][0] = dX + xx;
@@ -280,7 +277,8 @@ void genTerrain(int nbCaseLibreVoulu, Case** (*map)){
         char index = rand_a_b(0,nbAnc);
         dX = q[index][0];
         dY = q[index][1];
-        map[dX][dY]->type = libre; //rendre la case libre
+        game->map[dX][dY]->type = libre; //rendre la case libre
+        game->map[dX][dY]->image = &terre; //maj image
         nbCaseTake ++;
     }while(nbCaseTake < nbCaseLibreVoulu); //nb de case accessible voulu
 }
@@ -291,8 +289,8 @@ void genDepartArrivee(Jeu * game){
     char	dX, dY;
     do{
         //case au hasard
-        dX = rand_a_b(0,NB_CASE_X);
-        dY = rand_a_b(0,NB_CASE_Y);
+        dX = rand_a_b(0,game->nbCaseX);
+        dY = rand_a_b(0,game->nbCaseY);
 
         if (game->map[dX][dY]->type == libre){ //si case libre
             if (depart == 0){
@@ -319,12 +317,13 @@ void genObjet(int nbRessourceVoulu, Jeu * game){
 
     while(nbCaseTake < nbRessourceVoulu){
         do{
-            x= rand_a_b(0,NB_CASE_X);
-            y= rand_a_b(0,NB_CASE_Y);
+            x= rand_a_b(0,game->nbCaseX);
+            y= rand_a_b(0,game->nbCaseY);
         }while(game->map[x][y]->type != libre);
         //game->ressources[nbCaseTake]->image = &gems; //bug, naffiche rien
         game->ressources[nbCaseTake]->position[0]=x;
         game->ressources[nbCaseTake]->position[1]=y;
+        game->ressources[nbCaseTake]->image = &gems;
         nbCaseTake++;
     }//pb pas de verif si case deja une ressource
 }

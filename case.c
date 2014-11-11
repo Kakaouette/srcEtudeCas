@@ -1,5 +1,3 @@
-#include <stdlib.h>
-
 #include "Case.h"
 
 /*#include "affichage.h"

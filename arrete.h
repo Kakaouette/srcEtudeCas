@@ -13,7 +13,7 @@ typedef struct Arrete Arrete;
 struct Arrete{
     short A[2]; // Coordonnees point A
     short B[2]; // Coordonnees point B
-    short D; // Distance entre A et B
+    short D; // Distance entre A et B //?= nb de case dans chemin parcouru?
     //string C; // Chemin, parcous à effectuer de A vers B (inverser la lecture pour B vers A).
 };
 

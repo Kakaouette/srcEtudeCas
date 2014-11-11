@@ -3,8 +3,6 @@
 #include "Jeu.h"
 
 
-Case cs[NB_CASE_X][NB_CASE_Y];
-
 /*void resetRessources(Ressource* ressources[]){
     int i;
     for(i = 0 ; i < ressources.length ; i++){
@@ -17,32 +15,53 @@ Case cs[NB_CASE_X][NB_CASE_Y];
 void execution(){} // Appell� depuis le main. Cr�� affichage/joueur/etc... // options a ajouter en argument
 
 
+static Case** casesTemp;
+static Ressource* ressourcesTemp;
+
 void new_Game(Jeu* game){
-    // allocation
+    //allocation temp
     int i;
-    game->map = malloc(NB_CASE_X * sizeof(*game->map));
-    for (i=0 ; i < NB_CASE_X ; i++){
-        game->map[i] = malloc(NB_CASE_Y * sizeof(**game->map));
+    casesTemp = malloc(game->nbCaseX * sizeof(*casesTemp));
+    for (i=0 ; i < game->nbCaseX ; i++){
+        casesTemp[i] = malloc(game->nbCaseY * sizeof(**casesTemp));
     }
-    //initialisation
+    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp));
+    //allocation map
+    game->map = malloc(game->nbCaseX * sizeof(*game->map));
+    for (i=0 ; i < game->nbCaseX ; i++){
+        game->map[i] = malloc(game->nbCaseY * sizeof(**game->map));
+    }
+    //allocation ressources
+    game->ressources = malloc(game->nbRessource* sizeof(Ressource));
+    //initialisation map
     int j;
-    for (i=0; i<NB_CASE_X;i++){
-        for (j=0; j<NB_CASE_Y;j++){
-            cs[i][j].depart = 0;
-            cs[i][j].arrivee = 0;
-            game->map[i][j] = &cs[i][j];
+    for (i=0; i<game->nbCaseX;i++){
+        for (j=0; j<game->nbCaseY;j++){
+            casesTemp[i][j].depart = 0;
+            casesTemp[i][j].arrivee = 0;
+            game->map[i][j] = &casesTemp[i][j];
         }
     }
+    //initialisation ressources
+    for (j=0; j<game->nbRessource;j++){
+        game->ressources[j] = &ressourcesTemp[j];
+    }
 }
-
 void free_Jeu(Jeu *game){
     int i;
-    // Libération mémoire : tableau dynamique à 2 dimensions
-    for (i=0; i<NB_CASE_X; i++)
+    // Libération mémoire des temp
+    for (i=0; i<game->nbCaseX; i++)
+    {
+        free(casesTemp[i]);
+    }
+    free(casesTemp);
+    free(ressourcesTemp);
+    // Libération mémoire map
+    for (i=0; i<game->nbCaseX; i++)
     {
         free (game->map[i]);
     }
     free(game->map);
-
+    // Libération mémoire ressources
     free(game->ressources);
 }
