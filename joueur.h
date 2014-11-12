@@ -6,7 +6,7 @@
 #include "ressource.h"
 
 typedef struct Joueur { // Acc�s � "map" pour acc�der aux cases sans garder le truc en fond
-    /*Case*/char arrivee[2];//?choisir mettre arrivee sur case ou position case arrivee sur joueur?
+    char arrivee[2];//?choisir mettre arrivee sur case ou position case arrivee sur joueur?
     SDL_Rect* image;
     char orientation;
     char position[2];
