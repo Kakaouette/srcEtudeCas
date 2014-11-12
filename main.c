@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
         SDL_WM_SetIcon(IMG_Load("Image/sac.png"), NULL); //icon de la fenetre
         SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 119, 181, 254)); //couleur de fond de la fenetre
         /**Initialisation*/
-        jeu.J1.image = &araignee; //choix du joueur//peut etre different a chaque partie //squelette
+        jeu.J1.image = &squelette; //choix du joueur//peut etre different a chaque partie //squelette
         genTerrain((jeu.nbCaseX*jeu.nbCaseY)/3,&jeu); //creation du terrain
         genObjet(jeu.nbRessource, &jeu);
         genDepartArrivee(&jeu);

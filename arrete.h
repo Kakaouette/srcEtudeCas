@@ -11,9 +11,9 @@ typedef struct Arrete Arrete;
     sous la forme d'une chaine de caractere.
 */
 struct Arrete{
-    short A[2]; // Coordonnees point A
-    short B[2]; // Coordonnees point B
-    short D; // Distance entre A et B //?= nb de case dans chemin parcouru?
+    char A[2]; // Coordonnees point A
+    char B[2]; // Coordonnees point B
+    char D; // Distance entre A et B //?= nb de case dans chemin parcouru?
     //string C; // Chemin, parcous à effectuer de A vers B (inverser la lecture pour B vers A).
 };
 

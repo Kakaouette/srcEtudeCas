@@ -10,17 +10,16 @@
 #define Y 1 // Y pour l'ordonnee position[Y] second element du tableau
 
 
-void trier(Arrete* tab[], Arrete *aRanger){
+void trier(Arrete* (*tab), int nbArretes, Arrete *aRanger){
     ///memset();
     //short i, j, temp;
-    ///!!! Pas de "length" ou "size"
-    /*for(i = 0 ; i < tab.length ; i++){
+    for(i = 0 ; i < nbArretes ; i++){
         if(tab[i]==0){
             tab[i] = aRanger;
             break;
         }
         if((tab[i]->D)<(aRanger->D)){
-            for(j = i; j < tab.length ; j++){
+            for(j = i; j < nbArretes ; j++){
                 if(tab[i]==0){
                     tab[i] = aRanger;
                     break;
@@ -31,9 +30,17 @@ void trier(Arrete* tab[], Arrete *aRanger){
             break;
         }
     }
-    return tab;*/
+    return tab;
 }
-
+/*
+//allocation map
+    game->map = malloc(game->nbCaseX * sizeof(*game->map));
+    for (i=0 ; i < game->nbCaseX ; i++){
+        game->map[i] = malloc(game->nbCaseY * sizeof(**game->map));
+    }
+    //allocation ressources
+    game->ressources = malloc(game->nbRessource* sizeof(Ressource));
+*/
 void algorithmeSansContrainte(Joueur joueur, Ressource* ressources[]){
 
 };
@@ -43,7 +50,7 @@ char jouer(); // Un tour (pour le mode deux joueurs)
 ///!!! On donne la map en parametre. Mais chez moi y'a un probleme
 ///!!! il me donne "type incomplet" sur tableau à deux dimensions.
 ///!!! Envisager Case*** (ouais c'est moche), ou include de jeu ?
-short deplacement(Joueur* player, Case* map[], short x, short y) { //Une case
+short deplacement(Joueur* player, Case**(* map), short x, short y) { //Une case
     short depx = x - player->position[0];
     short depy = y - player->position[1];
     if (abs(depy) > abs(depx)) {
