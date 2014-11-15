@@ -1,2 +1,1 @@
-#include <string.h>
-#include <SDL_image.h>
+#include "ressource.h"

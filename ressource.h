@@ -5,7 +5,7 @@
 
 
 typedef struct Ressource{
-    SDL_Rect* image;
+    SDL_Rect *image;
     /// int valeur;
     char vue; // Pour la definition des arretes
     char rendu; // Pour le tri : passe une fois

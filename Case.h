@@ -2,15 +2,13 @@
 #define CASE_H
 
 #include <SDL_image.h>
-#include "ressource.h"
 
 typedef struct Case{
-        SDL_Rect* image;
+        SDL_Rect *image;
         char type;
-        Ressource *ressource;//?choisir mettre ressource sur case ou mettre position dans ressource?
 }Case;
 
-typedef enum Type{
+typedef enum Type{//passer type de case quon veut au generateur: genMap([3,10],...) -> 3 case libre et 10 infranchisable (faire corespondance avec lenum type
 	libre,
 	infranchissable
 	// perte de ressource, etc...
