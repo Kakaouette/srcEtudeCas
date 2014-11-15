@@ -82,6 +82,9 @@ void trierChemin(Arrete* (*tab), int nbArretes){
     game->ressources = malloc(game->nbRessource* sizeof(Ressource));
 */
 void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRessources){
+    // Tableau de long contenant la position X et Y d'un point et le flag associé (vu/passé)
+    long* etatPosition;
+    etatPosition = malloc((nbRessources+2) * sizeof(long));
     // Pas de ressources : on va directement au point d'arrivee.
     if(nbRessources == 0){
         ///deplacement(joueur, /*?*/, joueur->arrivee[X], joueur->arrivee[Y]);
@@ -110,8 +113,11 @@ void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRe
         arreteArrivee->D = abs((arreteArrivee->B[X]-arreteArrivee->A[X])+(arreteArrivee->B[Y]-arreteArrivee->A[Y]));
         trier(tabArretes, nbArretes, arreteArrivee);
     }
-    // Ajout des arretes entre ressoruces
+    etatPosition[0] = joueur->position[X] + (joueur->position[Y] << 8);
+    etatPosition[1] = joueur->arrivee[X] + (joueur->arrivee[Y] << 8);
+    // Ajout des arretes entre ressources
     for(i = 0, i < nbRessources, i++){
+        etatPosition[i+2] = ressources[i]->position[X] + (ressources[i]->position[Y] << 8);
         // On cherche la table en partant de i+1 pour parcourir
         // les autres ressources non parcourues precedemment
         for(j = i+1, j < nbRessources, j++){
@@ -126,9 +132,54 @@ void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRe
     // Tableau final avec les arretes selectionnees
     Arrete* (*chemin);
     chemin = malloc((nbRessources+1) * sizeof(*Arrete));
+    int A, B, avance = 0;
     // Enfin, on parcours le tableau pour definir le chemin le plus cours
     for(i = 0 ; i < nbArretes ; i++){
-
+        A = 0; B = 0;
+        // On regarde chaque point pour regarder l'état du point
+        // et éviter les boucles.
+        for(j = 0 ; j < (nbRessources+2) ; j++){
+            // On vérifie l'état du point A
+            if((tabArretes[i]->A[X] == (etatPosition[j]&0xFF)) &&
+               (tabArretes[i]->A[Y] == ((etatPosition[j]>>8)&0xFF)) &&){
+                if(((etatPosition[j]>>16)&0xFF)==0){
+                    A = j;
+                    if(B!=0){
+                        break;
+                    }
+                } else if (((etatPosition[j]>>16)&0xFF)==1){
+                    A = j + 0x0100;
+                    if(B!=0){
+                        break;
+                    }
+                } else {
+                    A = j + 0x0200; break;
+                }
+            }
+            // On vérifie l'état du point B
+            if((tabArretes[i]->B[X] == (etatPosition[j]&0xFF)) &&
+               (tabArretes[i]->B[Y] == ((etatPosition[j]>>8)&0xFF)) &&){
+                if(((etatPosition[j]>>16)&0xFF)==0){
+                    B = j;
+                    if(A!=0){
+                        break;
+                    }
+                } else if (((etatPosition[j]>>16)&0xFF)==1){
+                    B = j + 0x0100;
+                    if(A!=0){
+                        break;
+                    }
+                } else {
+                    B = j + 0x0200; break;
+                }
+            }
+        }
+        if(((A&0xFF00)!=2) && ((B&0xFF00)!=2)){
+            chemin[avance] = tabArretes[i];
+            avance++;
+            etatPosition[A&0xFF]+= 0x010000;
+            etatPosition[B&0xFF]+= 0x010000;
+        }
     }
 };
 
