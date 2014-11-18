@@ -46,7 +46,12 @@ short deplacement(Joueur* player, Case**(* map), short x, short y) { //Une case
     }
 }
 
-void trier(Arrete* (*tab), int nbArretes, Arrete *aRanger){
+long newPosition(char coordonnee[2]){
+    long position = coordonnee[X] + (coordonnee[Y] << 8);
+    return position;
+}
+
+Arrete** trierArretes(Arrete* (*tab), int nbArretes, Arrete *aRanger){
     ///memset();
     short i, j;
     Arrete* temp;
@@ -67,10 +72,30 @@ void trier(Arrete* (*tab), int nbArretes, Arrete *aRanger){
             break;
         }
     }
+    return tab;
 }
 
-void trierChemin(Arrete* (*tab), int nbArretes){
-
+Arrete** trierChemin(Arrete* (*tab), int nbArretes){
+    int i, j, k;
+    Arrete* arreteTemp = malloc(sizeof(Arrete));
+    // boucle pour trouver l'arrete suivante, la placer a la suite
+    // et continuer jusqu'a avoir range l'arbre.
+    for(i = 1 ; i < nbArretes ; i++){
+        for(j = i ; j < nbArretes ; j++){
+            if(comparerArrete(tab[i-1], tab[j])=='O'){
+                if(comparerArrete(tab[i-1], tab[j])=='I'){
+                    inverserPoints(tab[j]); // Inversion pour que le chemin soit toujours A -> B
+                }
+                for(k = j ; k > i ; k--){
+                    arreteTemp = tab[k-1];
+                    tab[k-1] = tab[k];
+                    tab[k] = arreteTemp;
+                }
+            }
+        }
+    }
+    free(arreteTemp);
+    return tab;
 }
 /*
 //allocation map
@@ -81,58 +106,52 @@ void trierChemin(Arrete* (*tab), int nbArretes){
     //allocation ressources
     game->ressources = malloc(game->nbRessource* sizeof(Ressource));
 */
-void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRessources){
-    // Tableau de long contenant la position X et Y d'un point et le flag associé (vu/passé)
-    long* etatPosition;
-    etatPosition = malloc((nbRessources+2) * sizeof(long));
+Arrete** algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRessources){
+    // Tableau final avec les arretes a retourner
+    Arrete* (*chemin);
+    chemin = malloc((nbRessources+1) * sizeof(Arrete*));
     // Pas de ressources : on va directement au point d'arrivee.
     if(nbRessources == 0){
-        ///deplacement(joueur, /*?*/, joueur->arrivee[X], joueur->arrivee[Y]);
-        return;
+        Arrete* arreteSimple = malloc(sizeof(Arrete));
+        chemin[0] = arreteSimple;
+        return chemin;
     }
-    // Nombre d'arretes total pour la taille tableau.
+
+    int i, j, A, B, avance;
+    // Nombre total d'arretes possibles.
     int nbArretes = (nbRessources * (nbRessources-1))/2 + nbRessources*2;
-    // Allocation tableau d'Arrete
+    // Allocation tableau avec toutes les arretes possibles
     Arrete* (*tabArretes);
-    tabArretes = malloc(nbArretes * sizeof(*Arrete));
-    int i,j;
+    tabArretes = malloc(nbArretes * sizeof(Arrete*));
+    // Tableau de long contenant la position X et Y d'un point et le flag associe
+    // Par octet de poids fort a faible : rien-flag-posY-posX
+    long* etatPosition;
+    etatPosition = malloc((nbRessources+2) * sizeof(long));
+    etatPosition[0] = newPosition(joueur->position);
+    etatPosition[1] = newPosition(joueur->arrivee);
+
     // Ajout des arretes liées au joueur et au point d'arrivee
-    for(i = 0, i < nbRessources, i++){
+    for(i = 0 ; i < nbRessources ; i++){
         // Ajout de l'arrete avec le joueur
-        Arrete* arreteJoueur = malloc(sizeof(Arrete));
-        arreteJoueur->A = joueur->position; // Point A (Joueur)
-        arreteJoueur->B = ressources[i]->position; // Point B (Ressource)
-        // Distance : |(Xb-Xa)+(Yb-Ya)|
-        arreteJoueur->D = abs((arreteJoueur->B[X]-arreteJoueur->A[X])+(arreteJoueur->B[Y]-arreteJoueur->A[Y]));
-        trier(tabArretes, nbArretes, arreteJoueur);
+        Arrete* arreteJoueur = newArrete(joueur->position, ressources[i]->position, c);
+        trierArretes(tabArretes, nbArretes, arreteJoueur);
         // Ajout de l'arrete avec le point d'arrivee
-        Arrete* arreteArrivee = malloc(sizeof(Arrete));
-        arreteArrivee->A = joueur->arrivee; // Point A (Joueur)
-        arreteArrivee->B = ressources[i]->position; // Point B (Ressource)
-        // Distance : |(Xb-Xa)+(Yb-Ya)|
-        arreteArrivee->D = abs((arreteArrivee->B[X]-arreteArrivee->A[X])+(arreteArrivee->B[Y]-arreteArrivee->A[Y]));
-        trier(tabArretes, nbArretes, arreteArrivee);
+        Arrete* arreteArrivee = newArrete(joueur->arrivee, ressources[i]->position, c);
+        trierArretes(tabArretes, nbArretes, arreteArrivee);
     }
-    etatPosition[0] = joueur->position[X] + (joueur->position[Y] << 8);
-    etatPosition[1] = joueur->arrivee[X] + (joueur->arrivee[Y] << 8);
+
     // Ajout des arretes entre ressources
-    for(i = 0, i < nbRessources, i++){
+    for(i = 0 ; i < nbRessources ; i++){
         etatPosition[i+2] = ressources[i]->position[X] + (ressources[i]->position[Y] << 8);
         // On cherche la table en partant de i+1 pour parcourir
         // les autres ressources non parcourues precedemment
-        for(j = i+1, j < nbRessources, j++){
-            Arrete* arreteRessource = malloc(sizeof(Arrete));
-            arreteRessource->A = ressources[i]->position; // Point A (Ressource i)
-            arreteRessource->B = ressources[j]->position; // Point B (Ressource j)
-            // Distance : |(Xb-Xa)+(Yb-Ya)|
-            arreteRessource->D = abs((arreteRessource->B[X]-arreteRessource->A[X])+(arreteRessource->B[Y]-arreteRessource->A[Y]));
-            trier(tabArretes, nbArretes, arreteRessource);
+        for(j = i+1 ; j < nbRessources ; j++){
+            Arrete* arreteRessource = newArrete(ressources[i], ressources[j]);
+            trierArretes(tabArretes, nbArretes, arreteRessource);
         }
     }
-    // Tableau final avec les arretes selectionnees
-    Arrete* (*chemin);
-    chemin = malloc((nbRessources+1) * sizeof(*Arrete));
-    int A, B, avance = 0;
+
+    avance = 0;
     // Enfin, on parcours le tableau pour definir le chemin le plus cours
     for(i = 0 ; i < nbArretes ; i++){
         A = 0; B = 0;
@@ -141,7 +160,7 @@ void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRe
         for(j = 0 ; j < (nbRessources+2) ; j++){
             // On vérifie l'état du point A
             if((tabArretes[i]->A[X] == (etatPosition[j]&0xFF)) &&
-               (tabArretes[i]->A[Y] == ((etatPosition[j]>>8)&0xFF)) &&){
+               (tabArretes[i]->A[Y] == ((etatPosition[j]>>8)&0xFF))){
                 if(((etatPosition[j]>>16)&0xFF)==0){
                     A = j;
                     if(B!=0){
@@ -158,7 +177,7 @@ void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRe
             }
             // On vérifie l'état du point B
             if((tabArretes[i]->B[X] == (etatPosition[j]&0xFF)) &&
-               (tabArretes[i]->B[Y] == ((etatPosition[j]>>8)&0xFF)) &&){
+               (tabArretes[i]->B[Y] == ((etatPosition[j]>>8)&0xFF))){
                 if(((etatPosition[j]>>16)&0xFF)==0){
                     B = j;
                     if(A!=0){
@@ -181,6 +200,28 @@ void algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRe
             etatPosition[B&0xFF]+= 0x010000;
         }
     }
+    Arrete* arreteTemp = malloc(sizeof(Arrete));
+    // Boucle pour retrouver le point de depart et le placer au debut.
+    for(i = 0 ; i < nbArretes ; i++){
+        if((chemin[i]->A[0] == joueur->position[0]) &&
+           (chemin[i]->A[1] == joueur->position[1])){
+            for(j = i ; j > 0 ; j--){
+                arreteTemp = chemin[j-1];
+                chemin[j-1] = chemin[j];
+                chemin[j] = arreteTemp;
+            }
+            break;
+        }
+    }
+    free(arreteTemp);
+    trierChemin(chemin, nbRessources+1);
+    ///!!! Free des elements avant ou juste free du tableau direct ?
+    for(i = 0 ; i < nbArretes ; i++){
+        free(tabArretes[i]);
+    }
+    free(tabArretes);
+    free(etatPosition);
+    return chemin;
 };
 
 char jouer(); // Un tour (pour le mode deux joueurs)
