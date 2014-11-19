@@ -1,5 +1,8 @@
 #include "arrete.h"
 
+#define X 0
+#define Y 1
+
 /**
     Retourne un pointeur d'arrete avec les points A, B et
     la distance calculee entre les deux points.
@@ -10,7 +13,8 @@ Arrete* newArrete(char A[2], char B[2]){
     arrete->A[Y] = A[Y];
     arrete->B[X] = B[X];
     arrete->B[Y] = B[Y];
-    arrete->D = abs( (B[X] - A[X]) + (B[Y] - A[Y]) );
+    arrete->D = abs(B[X] - A[X]) + abs(B[Y] - A[Y]);
+    /// Ajouter C pour hcemin et appeler fonction definissant chemin plus court quand contrainte
     return arrete;
 }
 
