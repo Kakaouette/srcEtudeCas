@@ -4,53 +4,81 @@
 #include <math.h>
 #include "case.h"
 #include "arrete.h"
+#include "jeu.h"
 
 #define X 0
 #define Y 1
 
-///!!! On donne la map en parametre. Mais chez moi y'a un probleme
-///!!! il me donne "type incomplet" sur tableau à deux dimensions.
-///!!! Envisager Case*** (ouais c'est moche), ou include de jeu ?
-short deplacement(Joueur* player, Case**(* map), short x, short y) { //Une case
+char jouer(); // Un tour (pour le mode deux joueurs)
+
+/**
+ * Gère le déplacement d'une case :
+ * Retourne -2 si la case est infranchissable
+ * Retourne -1 si la case est libre
+ * Retourne le numéro d'une ressource dans la liste des ressources si la case contient une ressource
+ * Place le joueur sur la case si elle n'est pas infranchissable
+ * 
+ * @param game      jeu
+ * @param player    joueur
+ * @param x         abscisse d'arrivée
+ * @param y         ordonnée d'arrivée
+ * @return int
+ */
+short deplacement(Jeu* game, Joueur* player, short x, short y) { //Une case
     short depx = x - player->position[0];
     short depy = y - player->position[1];
+    short sign;
+    int i;
+    Case* nextCase;
     if (abs(depy) > abs(depx)) {
         if (depy != 0) {
-            short sign = depy/abs(depy);
-            ///!!! "jeu" est inconnu, il faut donner la map ou le jeu en param
-            Case* nextCase = NULL; //jeu.map[player->position[X]][player->position[Y] + sign];
+            sign = depy/abs(depy);
+            nextCase = game->map[player->position[X]][player->position[Y] + sign];
             switch (nextCase->type) {
                 case libre :
                     player->position[Y] += sign;
-                    return 0;
+                    for (i = 0; i < game->nbRessource; i++) {
+                        if (player->position[X] == game->ressources[i]->position[X] &&
+                                player->position[Y] == game->ressources[i]->position[Y]) {
+                            return i;
+                        }
+                    }
+                    return -1;
 
-    // Try to allocate vector data, free structure if fail.
                 case infranchissable :
-                    return 1;
+                    return -2;
             }
         }
     } else {
         if (depx != 0) {
-            short sign = depx/abs(depx);
-            ///!!! Meme souci "jeu" et "map"
-            Case* nextCase = NULL;//jeu.map[player->position[X] + sign][player->position[Y]];
+            sign = depx/abs(depx);
+            nextCase = game->map[player->position[X] + sign][player->position[Y]];
             switch (nextCase->type) {
                 case libre :
                     player->position[X] += sign;
-                    return 0;
+                    for (i = 0; i < game->nbRessource; i++) {
+                        if (player->position[X] == game->ressources[i]->position[X] &&
+                                player->position[Y] == game->ressources[i]->position[Y]) {
+                            return i;
+                        }
+                    }
+                    return -1;
+
                 case infranchissable :
-                    return 1;
+                    return -2;
             }
         }
     }
 }
 
-char jouer(); // Un tour (pour le mode deux joueurs)
-
+//Essai d'itinéraire sans contraintes, 0% de garantie de fonctionnement
+//pas encore fini
 void algorithme() {
+    Jeu* game;
     Ressource* objectif;
     Joueur* player;
-    int depy = objectif->position[Y] - player->position[Y];
-    int depx = objectif->position[X] - player->position[X];
-    int dep = abs(depx) + abs(depy);
+    short depl;
+    while (player->position[X] != objectif->position[X] || player->position[Y] != objectif->position[Y]) {
+        depl = deplacement(game, player, objectif->position[X], objectif->position[Y]);
+    }
 }
