@@ -9,10 +9,16 @@
     sous la forme d'une chaine de caractere.
 */
 typedef struct Arrete{
-    char A[2]; // Coordonnees point A
-    char B[2]; // Coordonnees point B
+    char A[2]; // Coordonnees point A.
+    char B[2]; // Coordonnees point B.
+    char* C[2]; // Tableau contenant le chemin avec des couples [Sens,Distance]
+                // avec Sens = H,B,D,G pour Haut,Bas,Droite,Gauche
     char D; // Distance entre A et B //?= nb de case dans chemin parcouru?
     //string C; // Chemin, parcous à effectuer de A vers B (inverser la lecture pour B vers A).
 }Arrete;
+
+Arrete* newArrete(char A[2], char B[2]);
+Arrete* inverserPoints(Arrete* arrete);
+char comparerArrete(Arrete* premiere, Arrete* deuxieme);
 
 #endif // ARRETE_H

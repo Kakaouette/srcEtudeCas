@@ -4,10 +4,10 @@
 #include <time.h>
 #include <math.h>
 
-#include "Jeu.h"
 #include "Case.h"
 #include "ressource.h"
 #include "affichage.h"
+#include "jeu.h"
 
 char gestionMenu(SDL_Surface *ecran, Jeu *game, Option *opt);
 
@@ -308,6 +308,8 @@ char gestionEvent(SDL_Surface *ecran, Jeu *game, Option *opt){
                 case SDLK_RIGHT:
                     game->J1.position[0] += 1;
                     break;
+                default :
+                    break;
             }
             if (event.key.keysym.sym != SDLK_ESCAPE && event.key.keysym.sym != SDLK_r){choix = play;} //key autre que escape et "r"
         }else if (event.type == SDL_QUIT){choix = quitter;} //fermer
@@ -408,6 +410,8 @@ void gestionMenuOption(SDL_Surface *ecran, Option *opt){
                                     break;
                                 case SDLK_o:
                                     choix = 4;
+                                    break;
+                                default:
                                     break;
                             }
                             break;
@@ -538,6 +542,8 @@ int gestionTextBox(int value, SDL_Surface *ecran, SDL_Rect zone){
                     apply_surface(0, 0, texte, popup, NULL);
                     apply_surface(zone.x, zone.y,popup, ecran, NULL);
                     SDL_Flip(ecran); // Mise à jour de l'écran
+                    break;
+                default:
                     break;
             }
         }

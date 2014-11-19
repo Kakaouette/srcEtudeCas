@@ -2,9 +2,9 @@
 
 #define X 0
 #define Y 1
-#define etatPositionX etatPosition&0xFF
-#define etatPositionY (etatPosition>>8)&0xFF
-#define etatPositionFlag (etatPosition>>16)&0xFF
+#define etatPositionX (etatPosition&0xFF)
+#define etatPositionY ((etatPosition>>8)&0xFF)
+#define etatPositionFlag ((etatPosition>>16)&0xFF)
 
 long newPosition(char coordonnee[2]){
     long position = coordonnee[X] + (coordonnee[Y] << 8);
@@ -42,7 +42,6 @@ char evaluerPosition(char coordonnee[2], long etatPosition){
 Arrete** trierArretes(Arrete* (*tab), int nbArretes, Arrete *aRanger){
     ///memset();
     short i, j;
-    Arrete* temp;
     for(i = 0 ; i < nbArretes ; i++){
         if(tab[i]==0){
             tab[i] = aRanger;
@@ -54,7 +53,7 @@ Arrete** trierArretes(Arrete* (*tab), int nbArretes, Arrete *aRanger){
                     tab[i] = aRanger;
                     break;
                 }
-                temp = tab[i];
+                Arrete* temp = temp = tab[i];
                 tab[i] = aRanger;
             }
             break;
@@ -136,7 +135,7 @@ Arrete** algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int 
         // On cherche la table en partant de i+1 pour parcourir
         // les autres ressources non parcourues precedemment
         for(j = i+1 ; j < nbRessources ; j++){
-            Arrete* arreteRessource = newArrete(ressources[i], ressources[j]);
+            Arrete* arreteRessource = newArrete(ressources[i]->position, ressources[j]->position);
             trierArretes(tabArretes, nbArretes, arreteRessource);
         }
     }
