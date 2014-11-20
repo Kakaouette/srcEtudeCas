@@ -10,6 +10,7 @@ typedef struct Joueur { // Acc�s � "map" pour acc�der aux cases sans garde
     Sprite* sprite;
     char orientation;
     char position[2];
+    //Peut-on initialiser un tableau sans taille ?
     Ressource* sac[];//int score[nombreTypeRessource];
 }Joueur;
 

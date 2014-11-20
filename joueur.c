@@ -5,6 +5,7 @@
 #include "case.h"
 #include "arrete.h"
 #include "jeu.h"
+#include "ressource.h"
 
 #define X 0
 #define Y 1
@@ -29,6 +30,7 @@ short deplacement(Jeu* game, Joueur* player, short x, short y) { //Une case
     short depy = y - player->position[1];
     short sign;
     int i;
+    size_t size;
     Case* nextCase;
     if (abs(depy) > abs(depx)) {
         if (depy != 0) {
@@ -40,13 +42,17 @@ short deplacement(Jeu* game, Joueur* player, short x, short y) { //Une case
                     for (i = 0; i < game->nbRessource; i++) {
                         if (player->position[X] == game->ressources[i]->position[X] &&
                                 player->position[Y] == game->ressources[i]->position[Y]) {
+                            size = sizeof(player->[sac]) / sizeof(Ressource);
+                            player->sac[size] = game->ressources[i];
+                            free(game->ressources[i]);
+                            game->nbRessource--;
                             return i;
                         }
                     }
-                    return -1;
+                    return 0;
 
                 case infranchissable :
-                    return -2;
+                    return -1;
             }
         }
     } else {
@@ -59,13 +65,17 @@ short deplacement(Jeu* game, Joueur* player, short x, short y) { //Une case
                     for (i = 0; i < game->nbRessource; i++) {
                         if (player->position[X] == game->ressources[i]->position[X] &&
                                 player->position[Y] == game->ressources[i]->position[Y]) {
+                            size = sizeof(player->[sac]) / sizeof(Ressource);
+                            player->sac[size] = game->ressources[i];
+                            free(game->ressources[i]);
+                            game->nbRessource--;
                             return i;
                         }
                     }
-                    return -1;
+                    return 0;
 
                 case infranchissable :
-                    return -2;
+                    return -1;
             }
         }
     }
