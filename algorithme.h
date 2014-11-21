@@ -1,7 +1,6 @@
 #ifndef ALGORITHME_H
 #define ALGORITHME_H
 
-#include "arrete.h"
 #include "joueur.h"
 
 long newPosition(char coordonnee[2]);

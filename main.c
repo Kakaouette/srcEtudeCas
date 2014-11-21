@@ -4,7 +4,6 @@
 #include <SDL.h>
 #include <SDL_image.h>
 
-#include "Jeu.h"
 #include "affichage.h"
 
 extern const Sprite araignee;

@@ -3,7 +3,6 @@
 
 
 #include "ressource.h"
-#include "affichage.h"
 
 typedef struct Joueur { // Acc�s � "map" pour acc�der aux cases sans garder le truc en fond
     char arrivee[2];

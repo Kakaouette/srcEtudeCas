@@ -2,10 +2,6 @@
 
 #include <string.h>
 #include <math.h>
-#include "case.h"
-#include "arrete.h"
-#include "jeu.h"
-#include "ressource.h"
 
 #define X 0
 #define Y 1

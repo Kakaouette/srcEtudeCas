@@ -4,10 +4,7 @@
 #include <time.h>
 #include <math.h>
 
-#include "Case.h"
-#include "ressource.h"
 #include "affichage.h"
-#include "jeu.h"
 
 char gestionMenu(SDL_Surface *ecran, Jeu *game, Option *opt);
 

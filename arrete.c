@@ -2,6 +2,10 @@
 
 #define X 0
 #define Y 1
+#define xA arrete->A[X]
+#define xB arrete->B[X]
+#define yA arrete->A[Y]
+#define yB arrete->B[Y]
 
 /**
     Retourne un pointeur d'arrete avec les points A, B et
@@ -15,7 +19,12 @@ Arrete* newArrete(char A[2], char B[2]){
     arrete->B[Y] = B[Y];
     arrete->D = abs(B[X] - A[X]) + abs(B[Y] - A[Y]);
     /// Ajouter C pour chemin et appeler fonction definissant chemin plus court quand contrainte
+    ///arrete->C = calculChemin(A,B);
     return arrete;
+}
+
+char** calculChemin(Arrete* arrete/**, Case*** map ?!?! */){
+    //if(xB<xA)
 }
 
 /**

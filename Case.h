@@ -2,6 +2,7 @@
 #define CASE_H
 
 #include <SDL_image.h>
+#include "sprite.h"
 
 typedef struct Case{
         SDL_Rect *image;

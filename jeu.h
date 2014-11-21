@@ -1,9 +1,7 @@
 #ifndef JEU_H
 #define JEU_H
 
-#include "Case.h"
-#include "ressource.h"
-#include "joueur.h"
+#include "algorithme.h"
 
 
 typedef struct Jeu{

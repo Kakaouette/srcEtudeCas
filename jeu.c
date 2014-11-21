@@ -1,5 +1,4 @@
 #include "Jeu.h"
-#include "Case.h"
 
 
 extern const Case caseHerbe;

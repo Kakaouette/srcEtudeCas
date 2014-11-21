@@ -1,7 +1,7 @@
 #ifndef AFFICHAGE_H
 #define AFFICHAGE_H
 
-
+#include "jeu.h"
 #include <SDL_image.h>
 
 //attributs de la feuille de sprites
@@ -10,12 +10,6 @@
 
 #define pathNameTileset  "Tiny32-Complete-Spritesheet-Repack3.png"
 
-
-typedef struct Sprite{
-    char* pathName;//SDL_Surface *charset; //ou :char* pathName;
-    SDL_Rect clip;
-    char nbImageAnim;
-}Sprite;
 
 typedef enum fctMenu{
     choixNull,
