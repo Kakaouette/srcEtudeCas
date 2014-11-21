@@ -101,8 +101,7 @@ Arrete** algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int 
     chemin = malloc((nbRessources+1) * sizeof(Arrete*));
     // Pas de ressources : on va directement au point d'arrivee.
     if(nbRessources == 0){
-        Arrete* arreteSimple = malloc(sizeof(Arrete));
-        chemin[0] = arreteSimple;
+        chemin[0] = newArrete(joueur->position, joueur->arrivee);
         return chemin;
     }
 

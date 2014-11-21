@@ -1,6 +1,7 @@
 #ifndef CASE_H
 #define CASE_H
 
+#include "sprite.h"
 #include <SDL_image.h>
 
 typedef struct Case{

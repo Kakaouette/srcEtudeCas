@@ -1,6 +1,7 @@
 #ifndef RESSOURCE_H
 #define RESSOURCE_H
 
+#include "arrete.h"
 #include <SDL_image.h>
 
 
