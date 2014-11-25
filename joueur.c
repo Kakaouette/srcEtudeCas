@@ -2,89 +2,96 @@
 
 #include <string.h>
 #include <math.h>
+//#include "jeu.h"
 
 #define X 0
 #define Y 1
 
-char jouer(); // Un tour (pour le mode deux joueurs)
+char jouer(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le mode deux joueurs)
+
+    short result = deplacement(game->ressources, game->map, game->nbRessource, player, arrete->C[0]);
+    if (result != -1) {
+        game->nbRessource--;
+    }
+
+    free(arrete->C[0]);
+    arrete->D--;
+}
 
 /**
  * Gère le déplacement d'une case :
- * Retourne -2 si la case est infranchissable
  * Retourne -1 si la case est libre
  * Retourne le numéro d'une ressource dans la liste des ressources si la case contient une ressource
- * Place le joueur sur la case si elle n'est pas infranchissable
+ * Place le joueur sur la case
  *
- * @param game      jeu
- * @param player    joueur
- * @param x         abscisse d'arrivée
- * @param y         ordonnée d'arrivée
- * @return int
+ * @param ressources    liste des ressources
+ * @param map           carte des cases
+ * @param nbRessource   nombre total de ressources
+ * @param player        joueur actif
+ * @param depl          sens de déplacement (H/B/G/D)
+ * @return short
  */
-short deplacement(Ressource* *ressources, Case*** map, int nbRessource, Joueur* player, short x, short y) { //Une case
-    short depx = x - player->position[0];
-    short depy = y - player->position[1];
-    short sign;
+short deplacement(Ressource* *ressources, const Case*** map, int nbRessource, Joueur* player, char depl) { //Une case
     int i;
-    Case* nextCase;
-    if (abs(depy) > abs(depx)) {
-        if (depy != 0) {
-            sign = depy/abs(depy);
-            nextCase = map[player->position[X]][player->position[Y] + sign];
-            switch (nextCase->type) {
-                case libre :
-                    player->position[Y] += sign;
-                    for (i = 0; i < nbRessource; i++) {
-                        if (player->position[X] == ressources[i]->position[X] &&
-                                player->position[Y] == ressources[i]->position[Y]) {
-                            player->sac[player->nbRessources] = ressources[i];
-                            free(ressources[i]);
-                            nbRessource--;
-                            player->nbRessources++;
-                            return i;
-                        }
-                    }
-                    return 0;
 
-                case infranchissable :
-                    return -1;
-            }
-        }
-    } else {
-        if (depx != 0) {
-            sign = depx/abs(depx);
-            nextCase = map[player->position[X] + sign][player->position[Y]];
-            switch (nextCase->type) {
-                case libre :
-                    player->position[X] += sign;
-                    for (i = 0; i < nbRessource; i++) {
-                        if (player->position[X] == ressources[i]->position[X] &&
-                                player->position[Y] == ressources[i]->position[Y]) {
-                            player->sac[player->nbRessources] = ressources[i];
-                            free(ressources[i]);
-                            nbRessource--;
-                            player->nbRessources++;
-                            return i;
-                        }
-                    }
-                    return 0;
+    switch (depl) {
+        case 'H':
+            player->position[Y]--;
+            break;
 
-                case infranchissable :
-                    return -1;
-            }
+        case 'B':
+            player->position[Y]++;
+            break;
+
+        case 'G':
+            player->position[X]--;
+            break;
+
+        case 'D':
+            player->position[X]++;
+            break;
+    }
+
+    for (i = 0; i < nbRessource; i++) {
+        if (player->position[X] == ressources[i]->position[X] && player->position[Y] == ressources[i]->position[Y]) {
+            player->sac[i]++;
+            free(ressources[i]);
+            return i;
         }
     }
+    return -1;
 }
 
-//Essai d'itinéraire sans contraintes, 0% de garantie de fonctionnement
-//pas encore fini
-/*void algorithme() {
-    Jeu* game;
-    Ressource* objectif;
-    Joueur* player;
-    short depl;
-    while (player->position[X] != objectif->position[X] || player->position[Y] != objectif->position[Y]) {
-        depl = deplacement(game, player, objectif->position[X], objectif->position[Y]);
+//Fonction test qui ne déplace pas le joueur, renvoie juste le résultat
+short testDeplacement(Ressource* *ressources, const Case*** map, int nbRessource, Joueur* player, char depl) { //Une case
+    int i;
+    char new_x = player->position[X];
+    char new_y = player->position[Y];
+
+    switch (depl) {
+        case 'H':
+            new_y--;
+            break;
+
+        case 'B':
+            new_y++;
+            break;
+
+        case 'G':
+            new_x--;
+            break;
+
+        case 'D':
+            new_x++;
+            break;
     }
+
+    for (i = 0; i < nbRessource; i++) {
+        if (new_x == ressources[i]->position[X] && new_y == ressources[i]->position[Y]) {
+            player->sac[i]++;
+            free(ressources[i]);
+            return i;
+        }
+    }
+    return -1;
 }
-*/
