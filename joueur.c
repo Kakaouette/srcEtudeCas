@@ -1,20 +1,22 @@
-#include "joueur.h"
-
 #include <string.h>
 #include <math.h>
-//#include "jeu.h"
+#include "jeu.h"
 
 #define X 0
 #define Y 1
 
 char jouer(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le mode deux joueurs)
+    int i;
 
     short result = deplacement(game->ressources, game->map, game->nbRessource, player, arrete->C[0]);
     if (result != -1) {
         game->nbRessource--;
     }
 
-    free(arrete->C[0]);
+    for (i = 0; i < arrete->D - 1; i++) {
+        arrete->C[i] = arrete->C[i + 1];
+    }
+    free(arrete->C[arrete->D - 1]);
     arrete->D--;
 }
 
