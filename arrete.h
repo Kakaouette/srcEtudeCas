@@ -20,7 +20,6 @@ typedef struct Arrete{
 }Arrete;
 
 Arrete* newArrete(char A[2], char B[2]);
-char** calculChemin(Arrete* arrete);
 Arrete* inverserPoints(Arrete* arrete);
 char comparerArrete(Arrete* premiere, Arrete* deuxieme);
 

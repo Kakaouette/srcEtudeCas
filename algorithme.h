@@ -3,6 +3,8 @@
 
 #include "joueur.h"
 
+void calculChemin(char A[2], char B[2], Case*** carte, int actuel, int *meilleur, char*** chemin, char** meilleurChemin){
+
 long newPosition(char coordonnee[2]);
 char evaluerPosition(char coordonnee[2], long etatPosition);
 

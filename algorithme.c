@@ -6,6 +6,101 @@
 #define etatPositionY ((etatPosition>>8)&0xFF)
 #define etatPositionFlag ((etatPosition>>16)&0xFF)
 
+
+void calculChemin(char A[2], char B[2], Case*** carte, int actuel, int *meilleur, char*** chemin, char** meilleurChemin){
+    /// Le "*meilleur" est a verifier
+    // Limitation de l execution si on ne trouve pas de chemin plus court on abandonne
+    if( (actuel >= *meilleur) && (*meilleur != 0) ){
+        return;
+    }
+    // Rendu a l objectif on remplace les valeurs de meilleur distance et chemin
+    if( (A[X] == B[X]) && (A[Y] == B[Y]) ){
+        *meilleur = actuel;
+        int i;
+        *meilleurChemin = realloc(*meilleurChemin, sizeof(char)*actuel);
+        for(i = 0 ; i < actuel ; i++){
+            *meilleurChemin[i] = *chemin[i][2];
+        }
+        return;
+    }
+    /// chemin[]{X,Y,Sens}
+    /// meilleurChemin{Sens}
+    char directions[3] = {'X', 'X', *chemin[actuel]};
+    *chemin = realloc(*chemin, sizeof(char)*(actuel+1));
+    *chemin[actuel] = malloc(sizeof(char)*3);
+    /// essaie d'aller vers case X suivante.
+    if(A[X]<B[X] && *chemin[actuel-1][2]!='G'){
+        directions[X] = 'D';
+        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        if(carte[A[X]+1][A[Y]]->type!=infranchissable){
+            *chemin[actuel]= {A[X],A[Y],'D'};
+            calculChemin({A[X]+1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        } else {
+            /// Sinon, chemin = NULLL;
+            *chemin[actuel][2] = NULL;
+        }
+    } else if (A[X]>B[X] && *chemin[actuel-1][2]!='D'){
+        directions[X] = 'G';
+        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        if(carte[A[X]-1][A[Y]]->type!=infranchissable){
+            *chemin[actuel]= {A[X],A[Y],'G'};
+            calculChemin({A[X]-1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        } else {
+            /// Sinon, chemin = NULLL;
+            *chemin[actuel][2] = NULL;
+        }
+    } else {
+        *chemin[actuel] = NULL;
+    }
+    /// essaie d'aller vers case Y suivante.
+    if(A[Y]<B[Y] && *chemin[actuel-1][2]!='B'){
+        directions[Y] = 'H';
+        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        if(carte[A[X]][A[Y]-1]->type!=infranchissable){
+            *chemin[actuel] = {A[X],A[Y],'H'};
+            calculChemin({A[X],A[Y]-1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        } else {
+            /// Sinon, chemin = NULLL;
+            *chemin[actuel][2] = NULL;
+        }
+    } else if (A[Y]>B[Y] && *chemin[actuel-1][2]!='H'){
+        directions[Y] = 'B';
+        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        if(carte[A[X]][A[Y]+1]->type!=infranchissable){
+            *chemin[actuel] = {A[X],A[Y],'B'};
+            calculChemin({A[X],A[Y]+1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        } else {
+            /// Sinon, chemin = NULLL;
+            *chemin[actuel][2] = NULL;
+        }
+    }
+    if(*chemin[actuel][2] == NULL){
+        char direction = 'G';
+        if(!directionExiste && (carte[A[X]-1][A[Y]]->type!=infranchissable)){
+            *chemin[actuel] = {A[X],A[Y],'G'};
+            calculChemin({A[X]-1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        }
+        direction = 'D';
+        if(!directionExiste && (carte[A[X]+1][A[Y]]->type!=infranchissable)){
+            *chemin[actuel] = {A[X],A[Y],'D'};
+            calculChemin({A[X]+1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        }
+        direction = 'B';
+        if(!directionExiste && (carte[A[X]][A[Y]+1]->type!=infranchissable)){
+            *chemin[actuel] = {A[X],A[Y],'B'};
+            calculChemin({A[X],A[Y]+1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        }
+        direction = 'H';
+        if(!directionExiste && (carte[A[X]][A[Y]-1]->type!=infranchissable)){
+            *chemin[actuel] = {A[X],A[Y],'H'};
+            calculChemin({A[X],A[Y]-1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        }
+    }
+    /// Si arretes[0] et [1] sont NULL, calcul avec 3eme possibilite (pas de demi-tour)
+    /// /// Si arretes[3] = NULL retour NULL (Sauf cas depart qui autorise 4eme possibilite).
+    /// Sinon Retourne l'arrete avec D meilleure valeur.
+}
+
 long newPosition(char coordonnee[2]){
     long position = coordonnee[X] + (coordonnee[Y] << 8);
     return position;
