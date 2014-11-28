@@ -1,12 +1,12 @@
 #ifndef RESSOURCE_H
 #define RESSOURCE_H
 
-#include "arrete.h"
 #include <SDL_image.h>
+#include "arrete.h"
 
 
 typedef struct Ressource{
-    SDL_Rect *image;
+    Sprite *image;
     /// int valeur;
     char vue; // Pour la definition des arretes
     char rendu; // Pour le tri : passe une fois

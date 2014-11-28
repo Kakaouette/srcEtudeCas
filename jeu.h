@@ -9,7 +9,7 @@ typedef struct Jeu{
     int nbCaseX;
     int nbCaseY;
     Joueur J1;// = joueur.newJoueur(); // Aucune id�e.
-    Ressource* (*ressources);
+    Ressource* (*ressources);//tableauDeResourceParType[ressourceType0[position[x,y],...], ressourceType1,...]
     int nbRessource;
 }Jeu;
 
@@ -19,9 +19,11 @@ void execution();
 typedef struct Option{
     int nbCaseX;
     int nbCaseY;
+    int nbCaseLibre;
     int nbRessource;
     Sprite *sprite;
 }Option;
+
 
 void new_Game(Jeu *game, Option *defaut);
 void free_Jeu(Jeu *game);

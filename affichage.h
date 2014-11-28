@@ -1,8 +1,9 @@
 #ifndef AFFICHAGE_H
 #define AFFICHAGE_H
 
-#include "jeu.h"
+
 #include <SDL_image.h>
+#include "jeu.h"
 
 //attributs de la feuille de sprites
 #define SPRITE_WIDTH  32
@@ -16,7 +17,8 @@ typedef enum fctMenu{
     quitter,
     play,
     rejouer,
-    quitterMenuRejouer
+    quitterMenuRejouer,
+    victoire
 }fctMenu;
 /*
     //attributs de la feuille de sprites
@@ -26,12 +28,33 @@ typedef enum fctMenu{
     int SPRITE_HEIGHT=clip.h;
 */
 
+typedef struct OptionDAffichage{
+    int origineMapX;
+    int origineMapY;
+    char contourAffichee;
+}OptionDAffichage;
+//add contour (monde flottant): origine 1,1 /monde continu: origine 0,0
 
+
+//Prototype affichage
+void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game);
+void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, char anciennePosition[2], int vitesse);
+void afficher(SDL_Surface *ecran, Jeu *game, char anciennePosition[2], int vitesse);
+void afficherMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game);
+void afficherCase(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, int x, int y);
+void afficherScore(SDL_Surface *ecran, Jeu *game);
+void afficherRessources(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game);
 
 SDL_Rect* afficherMenuRejouer(SDL_Surface * ecran);
+SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt);
 
-int gestionTextBox(int value, SDL_Surface* ecran, SDL_Rect zone);
+//Prototype gestion des menu
+char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt);
+char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt);
+void gestionMenuOption(SDL_Surface *ecran, Option *opt);
+int gestionTextBox(int value, SDL_Surface* ecran, SDL_Rect zone, int limite);
 
+void afficherTest(SDL_Surface *ecran, int z);
 
 //Prototype dessin
 void ligneHorizontale(int x, int y, int width, Uint32 couleur, SDL_Surface *surface);

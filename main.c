@@ -6,21 +6,33 @@
 
 #include "affichage.h"
 
-extern const Sprite araignee;
-extern const Sprite squelette;
-extern const Sprite farmer;
+extern  Sprite araignee; //const//enlevé pour permettre que le load des images ne soit fait quune fois
+extern  Sprite squelette;
+extern  Sprite farmer;
+extern Sprite sprTerre;
+extern Sprite sprHerbe;
+
+extern  Case caseHerbe;
+extern  Case caseTerre;
 
 SDL_Rect* boutons;
 
 int main(int argc, char *argv[])
 {
     boutons = malloc(6 * sizeof(SDL_Rect));//allocation
-    /**Déclaration des options*/
+    /**Déclaration des options de jeu*/
     Option opt;
     opt.sprite = &araignee;
     opt.nbCaseX = 20;
     opt.nbCaseY = 15;
+    opt.nbCaseLibre = (opt.nbCaseX*opt.nbCaseY)/3;
     opt.nbRessource = 3;
+
+    /**Déclaration des options d'affichage*/
+    OptionDAffichage optAffichage;
+    optAffichage.origineMapX = 1;
+    optAffichage.origineMapY = 1;
+    optAffichage.contourAffichee = 1;
 
     /**Déclaration des varables*/
     Jeu jeu;
@@ -32,18 +44,27 @@ int main(int argc, char *argv[])
     const int SCREEN_BPP = 32;
 
     char choix = choixNull;
-    char anciennePosition[2], dplJoueur[2];
+    char anciennePosition[2];
 
 
     srand(time(NULL)); // initialisation de rand
     SDL_Init(SDL_INIT_VIDEO);
 
+    /**Pré-load des images*/
+    araignee.image = IMG_Load(araignee.pathName);
+    squelette.image = IMG_Load(squelette.pathName);
+    farmer.image = IMG_Load(farmer.pathName);
+    sprHerbe.image = IMG_Load(sprHerbe.pathName);
+    sprTerre.image = IMG_Load(sprTerre.pathName);
+    /**Load des sprites*/
+    caseHerbe.sprite = &sprHerbe;
+    caseTerre.sprite = &sprTerre;
 
 
     do{
         /**Initialisation de la fenetre*/
-        SCREEN_WIDTH = opt.nbCaseX*SPRITE_WIDTH;
-        SCREEN_HEIGHT = opt.nbCaseY*SPRITE_HEIGHT;
+        SCREEN_WIDTH = (opt.nbCaseX + 2*optAffichage.origineMapX)*SPRITE_WIDTH;
+        SCREEN_HEIGHT = (opt.nbCaseY + 2*optAffichage.origineMapY)*SPRITE_HEIGHT;
         SDL_WM_SetCaption("La cueillette", NULL); //titre de la fenetre
         SDL_WM_SetIcon(IMG_Load("Image/sac.png"), NULL); //icone de la fenetre
         ecran = SDL_SetVideoMode(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP, SDL_HWSURFACE); //afficher fenetre
@@ -51,34 +72,52 @@ int main(int argc, char *argv[])
         /**Initialisation du jeu*/
         new_Game(&jeu, &opt);// allocation + initialisation
         jeu.J1.sprite = opt.sprite; //choix de l'apparence du joueur
-        genTerrain(&jeu,(jeu.nbCaseX*jeu.nbCaseY)/3); //creation du terrain
+        genTerrain(&jeu,opt.nbCaseLibre); //creation du terrain
         genObjet(&jeu);
         genDepartArrivee(&jeu);
         anciennePosition[0] = jeu.J1.position[0];
         anciennePosition[1] = jeu.J1.position[1];
         jeu.J1.orientation = bas;
+
+
+        /**Affichage du jeu de départ*/
+        affichageInitial(&optAffichage, ecran, &jeu);
+
         do{
-            dplJoueur[0] = jeu.J1.position[0] - anciennePosition[0];
-            dplJoueur[1] = jeu.J1.position[1] - anciennePosition[1];
+            choix = gestionEvent(&optAffichage, ecran, &jeu, &opt);
+            if (choix == play || choix == choixNull){
+                /**Affichage*/
+                afficherDpl(&optAffichage, ecran, &jeu, anciennePosition, 250);
 
-            /**Affichage*/
-            afficher(ecran, &jeu, dplJoueur, 500);
+                anciennePosition[0] = jeu.J1.position[0];
+                anciennePosition[1] = jeu.J1.position[1];
 
-            anciennePosition[0] = jeu.J1.position[0];
-            anciennePosition[1] = jeu.J1.position[1];
+                if (jeu.J1.position[0] == jeu.J1.arrivee[0]
+                    && jeu.J1.position[1] == jeu.J1.arrivee[1]){//&& game->J1.sac[0] == nbRessource || game->nbRessource == 0 //ttes les ressources sont ramassees
+                    choix = victoire;
+                }
+            }
+        }while(choix!=quitter && choix!=rejouer && choix!=victoire); //fin de partie
 
-            choix = gestionEvent(ecran, &jeu, &opt);
+        if (choix==victoire){
+            SDL_Color gold = {255,215,0};
+            apply_text(ecran->w/2-96, 128, "Victoire!", ecran, "Fonts/OCRAStd.otf", 32, gold);
 
-            /**Déplacement du joueur*/
+            choix = gestionMenu(&optAffichage, ecran, &jeu, &opt);
+        } //fin de partie: voulez vous rejouer
 
-        }while(choix!=quitter && choix!=rejouer); //&& game->J1.score[0] < nbRessource //ttes les ressources sont ramassees //fin de partie
-
-        if (choix!=quitter && choix!=rejouer){choix = gestionMenu(ecran, &jeu);} //fin de partie: voulez vous rejouer
         free_Jeu(&jeu); //désallocation
     }while (choix!=quitter); //rejouer
 
     SDL_Quit(); //Arrêt de la SDL
 
+
+    // On libère les surface
+    SDL_FreeSurface(araignee.image);
+    SDL_FreeSurface(squelette.image);
+    SDL_FreeSurface(farmer.image);
+    SDL_FreeSurface(sprHerbe.image);
+    SDL_FreeSurface(sprTerre.image);
 
     //liberation memoire
     free(boutons);

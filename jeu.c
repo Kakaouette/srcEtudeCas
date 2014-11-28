@@ -1,9 +1,9 @@
 #include "Jeu.h"
 
 
-extern const Case caseHerbe;
-extern const Case caseTerre;
-extern const SDL_Rect gems;
+extern  Case caseHerbe;
+extern  Case caseTerre;
+extern const Sprite gems;
 
 
 void resetRessources(Jeu *game){
@@ -22,10 +22,10 @@ static Ressource* ressourcesTemp;
 void new_Game(Jeu *game, Option *defaut){
     game->nbCaseX = defaut->nbCaseX;//.nbCaseX =50//fullscreen
     game->nbCaseY = defaut->nbCaseY;//.nbCaseY =28//fullscreen
-    game->nbRessource = defaut->nbRessource; //add: verif que sa ne depasse pas le nb de cases libre
+    game->nbRessource = defaut->nbRessource;
 
     //allocation temp
-    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp));
+    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp)); //sizeof(Ressource)
     //allocation map
     int i;
     game->map = malloc(game->nbCaseX * sizeof(*game->map));
@@ -186,7 +186,7 @@ void genObjet(Jeu *game){
                     }
                 }
             }
-        }while(game->map[x][y]->type != libre || dejaRessource);
+        }while(game->map[x][y]->type != libre || dejaRessource == 1);
 
         game->ressources[nbCaseTake]->position[0]=x;
         game->ressources[nbCaseTake]->position[1]=y;

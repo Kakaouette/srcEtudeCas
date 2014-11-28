@@ -4,7 +4,7 @@
 
 #include "ressource.h"
 
-typedef struct Joueur { // Acc�s � "map" pour acc�der aux cases sans garder le truc en fond
+typedef struct Joueur {
     char arrivee[2];
     Sprite* sprite;
     char orientation;
