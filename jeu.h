@@ -5,14 +5,15 @@
 
 
 typedef struct Jeu{
-    const Case** (*map); //le const s'applique à la valeur pointée
+    const Case*** map; //le const s'applique à la valeur pointée
     int nbCaseX;
     int nbCaseY;
     Joueur J1;// = joueur.newJoueur(); // Aucune id�e.
-    Ressource* (*ressources);//tableauDeResourceParType[ressourceType0[position[x,y],...], ressourceType1,...]
+    Ressource** ressources;//tableauDeResourceParType[ressourceType0[position[x,y],...], ressourceType1,...]
     int nbRessource;
 }Jeu;
 
+char jouerTour(Jeu*, Joueur*, Arrete*);
 void execution();
 
 
@@ -23,7 +24,6 @@ typedef struct Option{
     int nbRessource;
     Sprite *sprite;
 }Option;
-
 
 void new_Game(Jeu *game, Option *defaut);
 void free_Jeu(Jeu *game);

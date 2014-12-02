@@ -6,7 +6,7 @@
 
 #include "affichage.h"
 
-extern  Sprite araignee; //const//enlevé pour permettre que le load des images ne soit fait quune fois
+extern  Sprite araignee; //const//enlevï¿½ pour permettre que le load des images ne soit fait quune fois
 extern  Sprite squelette;
 extern  Sprite farmer;
 extern Sprite sprTerre;
@@ -20,7 +20,7 @@ SDL_Rect* boutons;
 int main(int argc, char *argv[])
 {
     boutons = malloc(6 * sizeof(SDL_Rect));//allocation
-    /**Déclaration des options de jeu*/
+    /**Dï¿½claration des options de jeu*/
     Option opt;
     opt.sprite = &araignee;
     opt.nbCaseX = 20;
@@ -28,17 +28,17 @@ int main(int argc, char *argv[])
     opt.nbCaseLibre = (opt.nbCaseX*opt.nbCaseY)/3;
     opt.nbRessource = 3;
 
-    /**Déclaration des options d'affichage*/
+    /**Dï¿½claration des options d'affichage*/
     OptionDAffichage optAffichage;
     optAffichage.origineMapX = 1;
     optAffichage.origineMapY = 1;
     optAffichage.contourAffichee = 1;
 
-    /**Déclaration des varables*/
+    /**Dï¿½claration des varables*/
     Jeu jeu;
     SDL_Surface *ecran = NULL; //screen
 
-    //attributs de l'écran
+    //attributs de l'ï¿½cran
     int SCREEN_WIDTH;
     int SCREEN_HEIGHT;
     const int SCREEN_BPP = 32;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     srand(time(NULL)); // initialisation de rand
     SDL_Init(SDL_INIT_VIDEO);
 
-    /**Pré-load des images*/
+    /**Prï¿½-load des images*/
     araignee.image = IMG_Load(araignee.pathName);
     squelette.image = IMG_Load(squelette.pathName);
     farmer.image = IMG_Load(farmer.pathName);
@@ -59,7 +59,6 @@ int main(int argc, char *argv[])
     /**Load des sprites*/
     caseHerbe.sprite = &sprHerbe;
     caseTerre.sprite = &sprTerre;
-
 
     do{
         /**Initialisation de la fenetre*/
@@ -79,24 +78,54 @@ int main(int argc, char *argv[])
         anciennePosition[1] = jeu.J1.position[1];
         jeu.J1.orientation = bas;
 
-
-        /**Affichage du jeu de départ*/
+        /**Affichage du jeu de dï¿½part*/
         affichageInitial(&optAffichage, ecran, &jeu);
 
-        do{
+        int cases[2] = {jeu.nbCaseX, jeu.nbCaseY};
+        //Arrete** arretes = algorithmeChemin(&jeu.J1, &jeu.ressources, &jeu.nbRessource, &jeu.map, cases);
+        Arrete *arrete = malloc(sizeof(Arrete));
+        arrete->A[0] = 2;
+        arrete->A[1] = 6;
+        arrete->B[0] = 8;
+        arrete->B[1] = 12;
+        arrete->D = 12;
+        arrete->C = malloc(sizeof(char) * 12);
+        arrete->C[0] = 'D';
+        arrete->C[1] = 'D';
+        arrete->C[2] = 'D';
+        arrete->C[3] = 'D';
+        arrete->C[4] = 'D';
+        arrete->C[5] = 'D';
+        arrete->C[6] = 'B';
+        arrete->C[7] = 'B';
+        arrete->C[8] = 'B';
+        arrete->C[9] = 'B';
+        arrete->C[10] = 'B';
+        arrete->C[11] = 'B';
+        int i;
+
+       do{
             choix = gestionEvent(&optAffichage, ecran, &jeu, &opt);
             if (choix == play || choix == choixNull){
+
+                if (i < jeu.nbRessource + 1){
+                    char result = jouerTour(&jeu, &jeu.J1, arrete);
+                    if (result == 'F'){i++;}
+                }
+
                 /**Affichage*/
                 afficherDpl(&optAffichage, ecran, &jeu, anciennePosition, 250);
 
                 anciennePosition[0] = jeu.J1.position[0];
                 anciennePosition[1] = jeu.J1.position[1];
 
-                if (jeu.J1.position[0] == jeu.J1.arrivee[0]
+            }
+
+        if (jeu.J1.position[0] == jeu.J1.arrivee[0]
                     && jeu.J1.position[1] == jeu.J1.arrivee[1]){//&& game->J1.sac[0] == nbRessource || game->nbRessource == 0 //ttes les ressources sont ramassees
                     choix = victoire;
                 }
-            }
+
         }while(choix!=quitter && choix!=rejouer && choix!=victoire); //fin de partie
 
         if (choix==victoire){
@@ -106,13 +135,12 @@ int main(int argc, char *argv[])
             choix = gestionMenu(&optAffichage, ecran, &jeu, &opt);
         } //fin de partie: voulez vous rejouer
 
-        free_Jeu(&jeu); //désallocation
+        free_Jeu(&jeu); //dï¿½sallocation
     }while (choix!=quitter); //rejouer
 
-    SDL_Quit(); //Arrêt de la SDL
+    SDL_Quit(); //Arrï¿½t de la SDL
 
-
-    // On libère les surface
+    // On libï¿½re les surface
     SDL_FreeSurface(araignee.image);
     SDL_FreeSurface(squelette.image);
     SDL_FreeSurface(farmer.image);

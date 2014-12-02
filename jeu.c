@@ -1,18 +1,22 @@
-#include "Jeu.h"
+#include "jeu.h"
 
 
 extern  Case caseHerbe;
 extern  Case caseTerre;
 extern const Sprite gems;
 
-
-void resetRessources(Jeu *game){
+char jouerTour(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le mode deux joueurs)
     int i;
-    for(i = 0 ; i < game->nbRessource ; i++){
-        game->ressources[i]->vue = 0;
-        game->ressources[i]->pass = 0;
-        game->ressources[i]->rendu = 0;
+
+    deplacement(game->ressources, game->nbRessource, player, arrete->C[0]);
+
+    for (i = 0; i < arrete->D - 1; i++) {
+        arrete->C[i] = arrete->C[i + 1];
     }
+    free(&arrete->C[arrete->D - 1]);
+    arrete->D--;
+
+    return (arrete->D == 0) ? 'T' : 'F';
 }
 
 void execution(){} // Appell� depuis le main. Cr�� affichage/joueur/etc... // options a ajouter en argument
@@ -25,7 +29,7 @@ void new_Game(Jeu *game, Option *defaut){
     game->nbRessource = defaut->nbRessource;
 
     //allocation temp
-    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp)); //sizeof(Ressource)
+    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp));//sizeof(Ressource)
     //allocation map
     int i;
     game->map = malloc(game->nbCaseX * sizeof(*game->map));
