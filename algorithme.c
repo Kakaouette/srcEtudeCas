@@ -5,9 +5,40 @@
 #define etatPositionX (etatPosition&0xFF)
 #define etatPositionY ((etatPosition>>8)&0xFF)
 #define etatPositionFlag ((etatPosition>>16)&0xFF)
+#define directionExiste ((directions[0]==direction)||(directions[1]==direction)||(directions[2]==direction))
 
+char * remplirChemin(char A, char B, char *C, char D){
+    C[0] = A;
+    C[1] = B;
+    C[2] = D;
+    return C;
+}
 
-void calculChemin(char A[2], char B[2], Case*** carte, int actuel, int *meilleur, char*** chemin, char** meilleurChemin){
+void testChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char** chemin, char** meilleurChemin, char direction){
+    char x, y;
+    switch(direction){
+        case 'G' :
+            x = -1; y = 0; break;
+        case 'D' :
+            x = +1; y = 0; break;
+        case 'B' :
+            x = 0; y = +1; break;
+        case 'H' :
+            x = 0; y = -1; break;
+        default :
+            break;
+    }
+    if(testDeplacement(carte, nbCases, A, direction)==0){
+        chemin[actuel] = remplirChemin(A[X], A[Y], chemin[actuel], direction);
+        char Abis[2] = {A[X]+x,A[Y]+y};
+        calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
+    } else {
+        /// Sinon, chemin = NULLL;
+        chemin[actuel][2] = 'X';
+    }
+}
+
+void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char** chemin, char** meilleurChemin){
     /// Le "*meilleur" est a verifier
     // Limitation de l execution si on ne trouve pas de chemin plus court on abandonne
     if( (actuel >= *meilleur) && (*meilleur != 0) ){
@@ -19,83 +50,59 @@ void calculChemin(char A[2], char B[2], Case*** carte, int actuel, int *meilleur
         int i;
         *meilleurChemin = realloc(*meilleurChemin, sizeof(char)*actuel);
         for(i = 0 ; i < actuel ; i++){
-            *meilleurChemin[i] = *chemin[i][2];
+            *meilleurChemin[i] = chemin[i][2];
         }
         return;
     }
     /// chemin[]{X,Y,Sens}
     /// meilleurChemin{Sens}
-    char directions[3] = {'X', 'X', *chemin[actuel]};
-    *chemin = realloc(*chemin, sizeof(char)*(actuel+1));
-    *chemin[actuel] = malloc(sizeof(char)*3);
+    chemin = (char**)realloc(chemin, sizeof(char*)*(actuel+1));
+    chemin[actuel] = (char*)malloc(sizeof(char)*3);
+    char directions[3] = {'X', 'X', 'X'};
     /// essaie d'aller vers case X suivante.
-    if(A[X]<B[X] && *chemin[actuel-1][2]!='G'){
-        directions[X] = 'D';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(carte[A[X]+1][A[Y]]->type!=infranchissable){
-            *chemin[actuel]= {A[X],A[Y],'D'};
-            calculChemin({A[X]+1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
-        } else {
-            /// Sinon, chemin = NULLL;
-            *chemin[actuel][2] = NULL;
+    if(actuel>0){
+        directions[2] = chemin[actuel-1][2];
+        if(A[X]<B[X] && directions[2]!='G'){
+            directions[X] = 'D';
+            /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, directions[X]);
+        } else if (A[X]>B[X] && directions[2]!='D'){
+            directions[X] = 'G';
+            /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, directions[X]);
         }
-    } else if (A[X]>B[X] && *chemin[actuel-1][2]!='D'){
-        directions[X] = 'G';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(carte[A[X]-1][A[Y]]->type!=infranchissable){
-            *chemin[actuel]= {A[X],A[Y],'G'};
-            calculChemin({A[X]-1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
-        } else {
-            /// Sinon, chemin = NULLL;
-            *chemin[actuel][2] = NULL;
+        /// essaie d'aller vers case Y suivante.
+        if(A[Y]<B[Y] && directions[2]!='B'){
+            directions[Y] = 'H';
+            /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, directions[Y]);
+        } else if (A[Y]>B[Y] && directions[2]!='H'){
+            directions[Y] = 'B';
+            /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, directions[Y]);
         }
-    } else {
-        *chemin[actuel] = NULL;
+    } else{
+        chemin[actuel][2] = 'X';
     }
-    /// essaie d'aller vers case Y suivante.
-    if(A[Y]<B[Y] && *chemin[actuel-1][2]!='B'){
-        directions[Y] = 'H';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(carte[A[X]][A[Y]-1]->type!=infranchissable){
-            *chemin[actuel] = {A[X],A[Y],'H'};
-            calculChemin({A[X],A[Y]-1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
-        } else {
-            /// Sinon, chemin = NULLL;
-            *chemin[actuel][2] = NULL;
-        }
-    } else if (A[Y]>B[Y] && *chemin[actuel-1][2]!='H'){
-        directions[Y] = 'B';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(carte[A[X]][A[Y]+1]->type!=infranchissable){
-            *chemin[actuel] = {A[X],A[Y],'B'};
-            calculChemin({A[X],A[Y]+1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
-        } else {
-            /// Sinon, chemin = NULLL;
-            *chemin[actuel][2] = NULL;
-        }
-    }
-    if(*chemin[actuel][2] == NULL){
+    if(chemin[actuel][2] == 'X'){
         char direction = 'G';
-        if(!directionExiste && (carte[A[X]-1][A[Y]]->type!=infranchissable)){
-            *chemin[actuel] = {A[X],A[Y],'G'};
-            calculChemin({A[X]-1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        if(!directionExiste){
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, direction);
         }
         direction = 'D';
-        if(!directionExiste && (carte[A[X]+1][A[Y]]->type!=infranchissable)){
-            *chemin[actuel] = {A[X],A[Y],'D'};
-            calculChemin({A[X]+1,A[Y]}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        if(!directionExiste){
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, direction);
         }
         direction = 'B';
-        if(!directionExiste && (carte[A[X]][A[Y]+1]->type!=infranchissable)){
-            *chemin[actuel] = {A[X],A[Y],'B'};
-            calculChemin({A[X],A[Y]+1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        if(!directionExiste){
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, direction);
         }
         direction = 'H';
-        if(!directionExiste && (carte[A[X]][A[Y]-1]->type!=infranchissable)){
-            *chemin[actuel] = {A[X],A[Y],'H'};
-            calculChemin({A[X],A[Y]-1}, B, carte, actuel+1, meilleur, chemin, meilleurChemin);
+        if(!directionExiste){
+            testChemin(A, B, carte, nbCases, actuel, meilleur, chemin, meilleurChemin, direction);
         }
     }
+    free(chemin[actuel]);
     /// Si arretes[0] et [1] sont NULL, calcul avec 3eme possibilite (pas de demi-tour)
     /// /// Si arretes[3] = NULL retour NULL (Sauf cas depart qui autorise 4eme possibilite).
     /// Sinon Retourne l'arrete avec D meilleure valeur.
@@ -190,13 +197,13 @@ Arrete** trierChemin(Arrete* (*tab), int nbArretes){
     Retourne un tableau d'Arretes ordonnees, correspondant au chemin
     a effectuer.
 */
-Arrete** algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int nbRessources){
+Arrete** algorithmeChemin(Joueur *joueur, Ressource* (*ressources), int nbRessources, const Case*** carte, char nbCases[2]){
     // Tableau final avec les arretes a retourner
     Arrete* (*chemin);
     chemin = malloc((nbRessources+1) * sizeof(Arrete*));
     // Pas de ressources : on va directement au point d'arrivee.
     if(nbRessources == 0){
-        chemin[0] = newArrete(joueur->position, joueur->arrivee);
+        chemin[0] = newArrete(joueur->position, joueur->arrivee, carte, nbCases);
         return chemin;
     }
 
@@ -216,10 +223,10 @@ Arrete** algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int 
     // Ajout des arretes liées au joueur et au point d'arrivee
     for(i = 0 ; i < nbRessources ; i++){
         // Ajout de l'arrete avec le joueur
-        Arrete* arreteJoueur = newArrete(joueur->position, ressources[i]->position);
+        Arrete* arreteJoueur = newArrete(joueur->position, ressources[i]->position, carte, nbCases);
         trierArretes(tabArretes, nbArretes, arreteJoueur);
         // Ajout de l'arrete avec le point d'arrivee
-        Arrete* arreteArrivee = newArrete(joueur->arrivee, ressources[i]->position);
+        Arrete* arreteArrivee = newArrete(joueur->arrivee, ressources[i]->position, carte, nbCases);
         trierArretes(tabArretes, nbArretes, arreteArrivee);
     }
 
@@ -229,7 +236,7 @@ Arrete** algorithmeSansContrainte(Joueur *joueur, Ressource* (*ressources), int 
         // On cherche la table en partant de i+1 pour parcourir
         // les autres ressources non parcourues precedemment
         for(j = i+1 ; j < nbRessources ; j++){
-            Arrete* arreteRessource = newArrete(ressources[i]->position, ressources[j]->position);
+            Arrete* arreteRessource = newArrete(ressources[i]->position, ressources[j]->position, carte, nbCases);
             trierArretes(tabArretes, nbArretes, arreteRessource);
         }
     }

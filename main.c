@@ -82,34 +82,15 @@ int main(int argc, char *argv[])
         affichageInitial(&optAffichage, ecran, &jeu);
 
         int cases[2] = {jeu.nbCaseX, jeu.nbCaseY};
-        //Arrete** arretes = algorithmeChemin(&jeu.J1, &jeu.ressources, &jeu.nbRessource, &jeu.map, cases);
-        Arrete *arrete = malloc(sizeof(Arrete));
-        arrete->A[0] = 2;
-        arrete->A[1] = 6;
-        arrete->B[0] = 8;
-        arrete->B[1] = 12;
-        arrete->D = 12;
-        arrete->C = malloc(sizeof(char) * 12);
-        arrete->C[0] = 'D';
-        arrete->C[1] = 'D';
-        arrete->C[2] = 'D';
-        arrete->C[3] = 'D';
-        arrete->C[4] = 'D';
-        arrete->C[5] = 'D';
-        arrete->C[6] = 'B';
-        arrete->C[7] = 'B';
-        arrete->C[8] = 'B';
-        arrete->C[9] = 'B';
-        arrete->C[10] = 'B';
-        arrete->C[11] = 'B';
-        int i;
+        Arrete** arretes = algorithmeChemin(&jeu.J1, &jeu.ressources, &jeu.nbRessource, &jeu.map, cases);
+        int i = 0;
 
        do{
             choix = gestionEvent(&optAffichage, ecran, &jeu, &opt);
             if (choix == play || choix == choixNull){
 
                 if (i < jeu.nbRessource + 1){
-                    char result = jouerTour(&jeu, &jeu.J1, arrete);
+                    char result = jouerTour(&jeu, &jeu.J1, arretes[i]);
                     if (result == 'F'){i++;}
                 }
 

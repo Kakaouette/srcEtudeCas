@@ -70,8 +70,12 @@ int testDeplacement(const Case*** map, int nbCase[2], char position[2], char dep
             break;
     }
 
-    if (new_x >= 0 && new_x < nbCase[X] && new_y >= 0 && new_y < nbCase[Y] && map[new_x][new_y]->type != infranchissable) {
-        return 1;
+    if (new_x >= 0 && new_x < nbCase[X] && new_y >= 0 && new_y < nbCase[Y]){
+        if(map[new_x][new_y]->type != infranchissable) {
+            return 1;
+        } else {
+            return ;
+        }
     } else {
         return 0;
     }
