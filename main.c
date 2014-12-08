@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
         affichageInitial(&optAffichage, ecran, &jeu);
 
         int cases[2] = {jeu.nbCaseX, jeu.nbCaseY};
-        Arrete** arretes = algorithmeChemin(&jeu.J1, &jeu.ressources, &jeu.nbRessource, jeu.map, cases);
+        Arrete** arretes = algorithmeChemin(&jeu.J1, jeu.ressources, jeu.nbRessource, jeu.map, cases);
         int i = 0;
 
        do{
