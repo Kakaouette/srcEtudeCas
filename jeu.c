@@ -16,7 +16,7 @@ char jouerTour(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le 
     free(&arrete->C[arrete->D - 1]);
     arrete->D--;
 
-    return (arrete->D == 0) ? 'T' : 'F';
+    return (arrete->D == 0) ? 'F' : 'T';
 }
 
 void execution(){} // Appell� depuis le main. Cr�� affichage/joueur/etc... // options a ajouter en argument
