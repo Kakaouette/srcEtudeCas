@@ -8,12 +8,16 @@ extern const Sprite gems;
 char jouerTour(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le mode deux joueurs)
     int i;
 
-    deplacement(game->ressources, game->nbRessource, player, arrete->C[0]);
+    char ressource = deplacement(game->ressources, game->nbRessource, player, arrete->C[0]);
+
+    if (ressource == 'T') {
+        game->nbRessource--;
+    }
 
     for (i = 0; i < arrete->D - 1; i++) {
         arrete->C[i] = arrete->C[i + 1];
     }
-    free(&arrete->C[arrete->D - 1]);
+    //free(&arrete->C[arrete->D - 1]);
     arrete->D--;
 
     return (arrete->D == 0) ? 'F' : 'T';
@@ -49,6 +53,8 @@ void new_Game(Jeu *game, Option *defaut){
     for (j=0; j<game->nbRessource;j++){
         game->ressources[j] = &ressourcesTemp[j];
     }
+    //initilisation joueur
+    game->J1.sac[0] = 0;
 }
 void free_Jeu(Jeu *game){
     int i;

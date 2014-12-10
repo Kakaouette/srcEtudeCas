@@ -20,7 +20,7 @@ typedef enum Orientation{
     haut
 }Orientation;
 
-void deplacement(Ressource**, int, Joueur*, char);
+char deplacement(Ressource**, int, Joueur*, char);
 int testDeplacement(const Case***, int[2], char[2], char);
 
 #endif // JOUEUR_H

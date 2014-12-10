@@ -16,8 +16,8 @@
  * @param player        joueur actif
  * @param depl          sens de déplacement (H/B/G/D)
  */
-void deplacement(Ressource* *ressources, int nbRessource, Joueur* player, char depl) { //Une case
-    int i;
+char deplacement(Ressource* *ressources, int nbRessource, Joueur* player, char depl) { //Une case
+    int i, j;
 
     switch (depl) {
         case 'H':
@@ -39,11 +39,14 @@ void deplacement(Ressource* *ressources, int nbRessource, Joueur* player, char d
 
     for (i = 0; i < nbRessource; i++) {
         if (player->position[X] == ressources[i]->position[X] && player->position[Y] == ressources[i]->position[Y]) {
-            player->sac[0]++;
-            free(ressources[i]);
-            ressources[i] = NULL;
+            //player->sac[0]++;
+            for (j = i; j < nbRessource - 1; j++) {
+                ressources[j] = ressources[j + 1];
+            }
+            return 'T';
         }
     }
+    return 'F';
 }
 
 //Fonction test qui ne déplace pas le joueur, renvoie juste le résultat

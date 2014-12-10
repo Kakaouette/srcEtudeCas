@@ -49,6 +49,7 @@ void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *g
 
         SDL_Flip(ecran); // Mise à jour de l'écran
 }
+
 void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, char anciennePosition[2], int vitesse){
     /**Déclaration des variables*/
     SDL_Surface *charset =  game->J1.sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
@@ -80,6 +81,11 @@ void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
                     afficherCase(optAffichage, ecran, game,  game->J1.position[0]+x, game->J1.position[1]-y);
                 }
         }
+
+        SDL_Surface *background = SDL_CreateRGBSurface(SDL_HWSURFACE, ecran->w, SPRITE_HEIGHT, 32, 0, 0, 0, 0);
+        SDL_FillRect(background, NULL, SDL_MapRGB(ecran->format, 119, 181, 254));
+        apply_surface(optAffichage->origineMapX-1, optAffichage->origineMapY-1, background, ecran, NULL);
+
         /**affichage ressources*/
         afficherRessources(optAffichage, ecran, game);
         /**affichage perso*/
@@ -139,14 +145,15 @@ void afficherScore(SDL_Surface *ecran, Jeu *game){
     sprintf(affichageScore, "%s: %d", affichageScore,score); //ajout du char score
     apply_text(SPRITE_WIDTH/4, SPRITE_HEIGHT/4, affichageScore, ecran, "Fonts/OCRAStd.otf", 20, white);
 }
+
 void afficherRessources(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
     SDL_Surface *textures; //load le tileset;
     int i;
     for (i=0; i < game->nbRessource; i++){
         textures =  IMG_Load(game->ressources[i]->image->pathName); //load le tileset
         apply_surface((game->ressources[i]->position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->ressources[i]->position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT, textures, ecran, &game->ressources[i]->image->clip);
+        SDL_FreeSurface(textures); //On libère la surface
     }
-    SDL_FreeSurface(textures); //On libère la surface
 }
 
 void afficherContourMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
@@ -336,7 +343,7 @@ char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game,
     char choix = choixNull;
     SDL_Event event;
 
-    do{SDL_WaitEvent(&event);
+    /*do{SDL_WaitEvent(&event);
         if (event.type == SDL_KEYDOWN){
             switch(event.key.keysym.sym){
                 case SDLK_ESCAPE:
@@ -362,14 +369,15 @@ char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game,
             }
             if (event.key.keysym.sym != SDLK_ESCAPE && event.key.keysym.sym != SDLK_r){choix = play;} //key autre que escape et "r"
         }else if (event.type == SDL_QUIT){choix = quitter;} //fermer
-    }while(choix==choixNull);
+    }while(choix==choixNull);*/
 
     //temporisation
-    /*tempsPrecedent = SDL_GetTicks();
+    int tempsPrecedent = SDL_GetTicks();
+    int tempsActuel;
     do{
         SDL_PollEvent(&event);
         tempsActuel = SDL_GetTicks();
-    }while(tempsActuel - tempsPrecedent < 1000); // Si 1000 ms au moins se sont écoulées*/
+    }while(tempsActuel - tempsPrecedent < 250); // Si 1000 ms au moins se sont écoulées
     return choix;
 }
 char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt){

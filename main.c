@@ -84,13 +84,14 @@ int main(int argc, char *argv[])
         int cases[2] = {jeu.nbCaseX, jeu.nbCaseY};
         Arrete** arretes = algorithmeChemin(&jeu.J1, jeu.ressources, jeu.nbRessource, jeu.map, cases);
         int i = 0;
+        int ressourceMax = jeu.nbRessource + 1;
 
        do{
             choix = gestionEvent(&optAffichage, ecran, &jeu, &opt);
             if (choix == play || choix == choixNull){
-
-                if (i < jeu.nbRessource + 1){
+                if (i < ressourceMax){
                     char result = jouerTour(&jeu, &jeu.J1, arretes[i]);
+                    jeu.J1.sac[0]++;
                     if (result == 'F'){i++;}
                 }
 
@@ -103,7 +104,8 @@ int main(int argc, char *argv[])
             }
 
         if (jeu.J1.position[0] == jeu.J1.arrivee[0]
-                    && jeu.J1.position[1] == jeu.J1.arrivee[1]){//&& game->J1.sac[0] == nbRessource || game->nbRessource == 0 //ttes les ressources sont ramassees
+                    && jeu.J1.position[1] == jeu.J1.arrivee[1]
+                    && jeu.nbRessource == 0){ //ttes les ressources sont ramassees
                     choix = victoire;
                 }
 
