@@ -1,18 +1,21 @@
 #ifndef ALGORITHME_H
 #define ALGORITHME_H
 
-#include "joueur.h"
+#include "etatPosition.h"
 
-char * remplirChemin(char A, char B, char *C, char D);
-void testChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char** chemin, char** meilleurChemin, char direction);
-void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char** chemin, char** meilleurChemin);
+void reallocChemin(char*** chemin, int actuel);
+void remplirChemin(char posX, char posY, char* tab, char direction);
+char testChemin(char position[2], const Case*** carte, char nbCases[2], int actuel, char** chemin, char direction);
+void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char*** chemin, char** meilleurChemin);
 
-long newPosition(char coordonnee[2]);
-char evaluerPosition(char coordonnee[2], long etatPosition);
+Arrete* inverserPoints(Arrete* arrete);
+char comparerArrete(Arrete* premiere, Arrete* deuxieme);
 
 Arrete** trierArretes(Arrete* (*tab), int nbArretes, Arrete *aRanger);
 Arrete** trierChemin(Arrete* (*tab), int nbArretes);
 
 Arrete** algorithmeChemin(Joueur *joueur, Ressource* (*ressources), int nbRessources, const Case*** carte, char nbCases[2]);
+Arrete** cheminPlusCourt(Arrete** tabArretes, EtatPosition** etatPositions, int nbArretes, int nbRessources);
+Arrete** copieChemin(Arrete** chemin, int size);
 
 #endif // ALGORITHME_H

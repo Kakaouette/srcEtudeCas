@@ -74,7 +74,7 @@ int testDeplacement(const Case*** map, int nbCase[2], char position[2], char dep
         if(map[new_x][new_y]->type != infranchissable) {
             return 1;
         } else {
-            return ;
+            return 0;
         }
     } else {
         return 0;
