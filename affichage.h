@@ -52,7 +52,7 @@ typedef struct OptionDAffichage{
 
 //Prototype affichage
 void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game);
-void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, char anciennePosition[2], int vitesse);
+void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, int numPlayeur, char anciennePosition[2], int vitesse);
 void afficher(SDL_Surface *ecran, Jeu *game, char anciennePosition[2], int vitesse);
 void afficherMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game);
 void afficherCase(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, int x, int y);

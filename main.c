@@ -109,7 +109,7 @@ int main(int argc, char *argv[])
                 }
                 ///Affichage///
                 char anciennePosition[2] = {anciennesPositions[0+i*2], anciennesPositions[1+i*2]};
-                afficherDpl(&optAffichage, ecran, &jeu, jeu.players[i], anciennePosition, 250);
+                afficherDpl(&optAffichage, ecran, &jeu, jeu.players[i],i, anciennePosition, 250);
 
                 anciennesPositions[0+i*2] = jeu.players[i]->position[0];
                 anciennesPositions[1+i*2] = jeu.players[i]->position[1];

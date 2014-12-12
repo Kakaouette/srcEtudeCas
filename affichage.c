@@ -49,6 +49,13 @@ void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *g
             clip.y += game->players[i]->orientation * game->players[i]->sprite->clip.h;
             clip.x = game->players[i]->sprite->clip.x;
 
+            if (game->nbPlayer>1){
+                char affichageNb[2+1];
+                SDL_Color white = {255,255,255};
+                sprintf(affichageNb, "J%d",i+1);
+                int hauteurChar = 10;
+                apply_text((game->players[i]->position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->players[i]->position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT-game->players[i]->sprite->clip.h+SPRITE_HEIGHT - hauteurChar, affichageNb, ecran, "Fonts/OCRAStd.otf", 20, white);
+            }
             apply_surface((game->players[i]->position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->players[i]->position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT-game->players[i]->sprite->clip.h+SPRITE_HEIGHT, charset, ecran, &clip);
         }
         ///affichage score///
@@ -72,7 +79,7 @@ void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *g
  * \param anciennePosition[2] La position du joueur avant son deplacement
  * \param vitesse Nombre de milliseconde que la fonction met pour deplacer le joueur
  */
-void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, char anciennePosition[2], int vitesse){
+void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, int numPlayeur, char anciennePosition[2], int vitesse){
     ///Déclaration des variables///
     SDL_Surface *charset =  player->sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
     char i,x,y;
@@ -118,7 +125,16 @@ void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
             clip.x = player->sprite->clip.x+i*SPRITE_WIDTH;
             if(i==nbImageAnim){clip.x = player->sprite->clip.x;}
         }
-        apply_surface((anciennePosition[0]*nbImageAnim+dplJoueur[0]*i)*SPRITE_WIDTH/nbImageAnim+SPRITE_WIDTH/2-player->sprite->clip.w/2 + optAffichage->origineMapX*SPRITE_WIDTH, (anciennePosition[1]*nbImageAnim+dplJoueur[1]*i)*SPRITE_HEIGHT/nbImageAnim-player->sprite->clip.h+SPRITE_HEIGHT + optAffichage->origineMapY*SPRITE_HEIGHT, charset, ecran, &clip);
+        int positionX = (anciennePosition[0]*nbImageAnim+dplJoueur[0]*i)*SPRITE_WIDTH/nbImageAnim+SPRITE_WIDTH/2-player->sprite->clip.w/2 + optAffichage->origineMapX*SPRITE_WIDTH;
+        int positionY = (anciennePosition[1]*nbImageAnim+dplJoueur[1]*i)*SPRITE_HEIGHT/nbImageAnim-player->sprite->clip.h+SPRITE_HEIGHT + optAffichage->origineMapY*SPRITE_HEIGHT;
+        if (game->nbPlayer>1){
+            char affichageNb[2+1];
+            SDL_Color white = {255,255,255};
+            sprintf(affichageNb, "J%d",numPlayeur+1);
+            int hauteurChar = 10;
+            apply_text(positionX, positionY-hauteurChar, affichageNb, ecran, "Fonts/OCRAStd.otf", 20, white);
+        }
+        apply_surface(positionX, positionY, charset, ecran, &clip);
         ///affichage score///
         afficherScore(ecran, game);
 
