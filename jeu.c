@@ -44,6 +44,7 @@ void new_Game(Jeu *game, Option *defaut){
     game->nbCaseY = defaut->nbCaseY;//.nbCaseY =28//fullscreen
     game->nbRessource = defaut->nbRessource;
     game->nbPlayer = defaut->nbJoueur;
+    game->nbTourPassee = 0;
     ///Allocations///
     //allocation temp
     ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp)); //sizeof(Ressource)

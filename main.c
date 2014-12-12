@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     opt.nbCaseX = 20;
     opt.nbCaseY = 15;
     opt.nbCaseLibre = (opt.nbCaseX*opt.nbCaseY)/3;
-    opt.nbRessource = 3;//3
+    opt.nbRessource = 0;//3
 
     /**Déclaration des options d'affichage*/
     OptionDAffichage optAffichage;
@@ -101,6 +101,7 @@ int main(int argc, char *argv[])
             if(i+1<jeu.nbPlayer){i++;}else{i=0;}
             choix = gestionEvent(&optAffichage, ecran, &jeu, jeu.players[i], &opt);
             if (choix == play || choix == choixNull){
+                jeu.nbTourPassee++;
                 if (compteurArrete < nbArrete){
                     char result = jouerTour(&jeu, jeu.players[i], arretes[i][compteurArrete]);
                     if (result == 'F'){compteurArrete++;}

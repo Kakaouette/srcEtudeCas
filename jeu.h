@@ -21,6 +21,7 @@ typedef struct Jeu{
     int nbPlayer;
     Ressource* (*ressources);//tableauDeResourceParType[ressourceType0[position[x,y],...], ressourceType1,...]
     int nbRessource;
+    int nbTourPassee;
 }Jeu;
 
 void execution();

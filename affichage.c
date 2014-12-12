@@ -197,8 +197,11 @@ void afficherScore(SDL_Surface *ecran, Jeu *game){
     int i;
     for (i=0; i<game->nbPlayer; i++){ //multi joueur
         char affichageScore[20] = "Score";
-        if (game->nbPlayer>1){sprintf(affichageScore, "%s J%d", affichageScore, i+1);} //ajout du char joueur
-        int score = game->players[i]->sac[0];
+        int score
+        if (game->nbPlayer>1){ //ajout du char joueur
+            sprintf(affichageScore, "%s J%d", affichageScore, i+1);
+            score = game->players[i]->sac[0];
+        }else{score = game->nbTourPassee}
         sprintf(affichageScore, "%s: %d", affichageScore,score); //ajout du char score
         apply_text(SPRITE_WIDTH/4 + i*(32 + 192), SPRITE_HEIGHT/4, affichageScore, ecran, "Fonts/OCRAStd.otf", 20, white);
     }
