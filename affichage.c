@@ -92,7 +92,6 @@ void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
         player->orientation = (1-dplJoueur[1])*3/2;
     }
     clip.y += player->orientation * player->sprite->clip.h;
-
     ///On applique les sprites sur l'écran///
     int nbImageAnim = player->sprite->nbImageAnim;
     for (i=1; i<=nbImageAnim; i++){
@@ -197,11 +196,13 @@ void afficherScore(SDL_Surface *ecran, Jeu *game){
     int i;
     for (i=0; i<game->nbPlayer; i++){ //multi joueur
         char affichageScore[20] = "Score";
-        int score
+        int score;
         if (game->nbPlayer>1){ //ajout du char joueur
             sprintf(affichageScore, "%s J%d", affichageScore, i+1);
             score = game->players[i]->sac[0];
-        }else{score = game->nbTourPassee}
+        }else{
+            score = game->nbTourPassee;
+        }
         sprintf(affichageScore, "%s: %d", affichageScore,score); //ajout du char score
         apply_text(SPRITE_WIDTH/4 + i*(32 + 192), SPRITE_HEIGHT/4, affichageScore, ecran, "Fonts/OCRAStd.otf", 20, white);
     }

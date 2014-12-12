@@ -81,6 +81,7 @@ int main(int argc, char *argv[])
         char* anciennesPositions = malloc(2*jeu.nbPlayer * sizeof(char));
         int i=0;
         Arrete** *arretes = malloc(jeu.nbPlayer*sizeof(Arrete**));
+        int* compteurArrete=malloc(jeu.nbPlayer*sizeof(int));;
         for (i=0 ; i < jeu.nbPlayer ; i++){
             arretes[i] = malloc((jeu.nbRessource + 1) * sizeof(Arrete*));
         }
@@ -88,13 +89,13 @@ int main(int argc, char *argv[])
         for (i=0; i<jeu.nbPlayer; i++){
             anciennesPositions[0+i*2] = jeu.players[i]->position[0];
             anciennesPositions[1+i*2] = jeu.players[i]->position[1];
+            compteurArrete[i]=0;
             arretes[i] = algorithmeChemin(jeu.players[i], jeu.ressources, jeu.nbRessource, jeu.map, cases);
         }
 
         /**Affichage du jeu de départ*/
         affichageInitial(&optAffichage, ecran, &jeu);
 
-        int compteurArrete=0;
         int nbArrete = jeu.nbRessource + 1;
 
         do{
@@ -102,9 +103,9 @@ int main(int argc, char *argv[])
             choix = gestionEvent(&optAffichage, ecran, &jeu, jeu.players[i], &opt);
             if (choix == play || choix == choixNull){
                 jeu.nbTourPassee++;
-                if (compteurArrete < nbArrete){
-                    char result = jouerTour(&jeu, jeu.players[i], arretes[i][compteurArrete]);
-                    if (result == 'F'){compteurArrete++;}
+                if (compteurArrete[i] < nbArrete){
+                    char result = jouerTour(&jeu, jeu.players[i], arretes[i][compteurArrete[i]]);
+                    if (result == 'F'){compteurArrete[i]++;}
                 }
                 ///Affichage///
                 char anciennePosition[2] = {anciennesPositions[0+i*2], anciennesPositions[1+i*2]};
