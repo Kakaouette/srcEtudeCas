@@ -7,14 +7,14 @@
 
 /**
  * Gère le déplacement d'une case :
- * Retourne -1 si la case est libre
- * Retourne le numéro d'une ressource dans la liste des ressources si la case contient une ressource
+ * Retourne 'T' si le joueur tombe sur une ressource, 'F' sinon
  * Place le joueur sur la case
  *
  * @param ressources    liste des ressources
  * @param nbRessource   nombre total de ressources
  * @param player        joueur actif
  * @param depl          sens de déplacement (H/B/G/D)
+ * @return char
  */
 char deplacement(Ressource* *ressources, int nbRessource, Joueur* player, char depl) { //Une case
     int i, j;
@@ -39,7 +39,7 @@ char deplacement(Ressource* *ressources, int nbRessource, Joueur* player, char d
 
     for (i = 0; i < nbRessource; i++) {
         if (player->position[X] == ressources[i]->position[X] && player->position[Y] == ressources[i]->position[Y]) {
-            //player->sac[0]++;
+            player->sac[0]++;
             for (j = i; j < nbRessource - 1; j++) {
                 ressources[j] = ressources[j + 1];
             }
@@ -49,9 +49,17 @@ char deplacement(Ressource* *ressources, int nbRessource, Joueur* player, char d
     return 'F';
 }
 
-//Fonction test qui ne déplace pas le joueur, renvoie juste le résultat
+/**
+ * Vérifie si la case suivante est libre et si elle est dans les limtes de la carte
+ * Retourne 1 si la case est valide, 0 sinon
+ * 
+ * @param map       carte des cases
+ * @param nbCase    dimensions de la carte
+ * @param position  coordonnées de la nouvelle case
+ * @param depl      sens de déplacement (H/B/G/D)
+ * @return int
+ */
 int testDeplacement(const Case*** map, int nbCase[2], char position[2], char depl) { //Une case
-    int i;
     char new_x = position[X];
     char new_y = position[Y];
 

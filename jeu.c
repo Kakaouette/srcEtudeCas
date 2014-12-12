@@ -7,6 +7,16 @@ extern  Case caseHerbe;
 extern  Case caseTerre;
 extern const Sprite gems;
 
+/**
+ * Joue le tour d'un joueur selon une arrête donnée
+ * Décrémente le nombre de ressources si le joueur tombe sur une ressource
+ * Retourne 'F' si l'arrête est terminée, 'T' sinon
+ * 
+ * @param game      jeu en cours
+ * @param player    joueur
+ * @param arrete    arrete utilisée
+ * @return char
+ */
 char jouerTour(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le mode deux joueurs)
     int i;
 
