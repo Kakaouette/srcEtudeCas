@@ -4,6 +4,15 @@
 #include "algorithme.h"
 
 
+/**
+ * \struct Jeu
+ * \brief Toutes les données d'un jeu
+ *
+ * case: la carte
+ * nbCaseX, nbCaseY: nombre de case
+ * players: les joueurs dans un tableau
+ * ressources: les ressources dans un tableau
+ */
 typedef struct Jeu{
     const Case** (*map); //le const s'applique à la valeur pointée
     int nbCaseX;
@@ -17,6 +26,12 @@ typedef struct Jeu{
 void execution();
 char jouerTour(Jeu*, Joueur*, Arrete*);
 
+/**
+ * \struct Option
+ * \brief Les options de jeu
+ *
+ * sprites: l'apparence de chaque joueur dans un tableau
+ */
 typedef struct Option{
     int nbCaseX;
     int nbCaseY;

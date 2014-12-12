@@ -31,6 +31,13 @@ void execution(){} // Appell� depuis le main. Cr�� affichage/joueur/etc...
 static Ressource* ressourcesTemp;
 static Joueur* playersTemp;
 
+/**
+ * \fn void new_Game(Jeu *game, Option *defaut)
+ * \brief allocations memoire pour un jeu et initialisations
+ *
+ * \param game Le jeu dont on veux faire les allocations et initialisations
+ * \param defaut Les options de jeu
+ */
 void new_Game(Jeu *game, Option *defaut){
     ///Initialisation des paramètres du jeu///
     game->nbCaseX = defaut->nbCaseX;//.nbCaseX =50//fullscreen
@@ -71,6 +78,12 @@ void new_Game(Jeu *game, Option *defaut){
         game->players[j]->sac[0]=0;
     }
 }
+/**
+ * \fn void free_Jeu(Jeu *game)
+ * \brief liberation de memoire pour un jeu
+ *
+ * \param game Le jeu dont on veut liberer la memoire
+ */
 void free_Jeu(Jeu *game){
     int i;
     // Libération mémoire des temp
@@ -95,6 +108,13 @@ void free_Jeu(Jeu *game){
 }
 
 
+/**
+ * \fn void genTerrain(Jeu *game, int nbCaseLibreVoulu)
+ * \brief genere la carte pour un jeu
+ *
+ * \param game Le jeu dont on veut generer la carte
+ * \param nbCaseLibreVoulu Le nombre de cases libre que l'on veut sur la carte
+ */
 void genTerrain(Jeu *game, int nbCaseLibreVoulu){
     //Déclaration des variables
     int nbCaseTake = 0;
@@ -163,6 +183,12 @@ void genTerrain(Jeu *game, int nbCaseLibreVoulu){
         free(q);
     }while(nbCaseTake < nbCaseLibreVoulu); //nb de case accessible voulu
 }
+/**
+ * \fn void genDepartArrivee(Jeu *game)
+ * \brief donne la position de depart et d'arriver pour les joueurs du jeu
+ *
+ * \param game Le jeu qui contient les joueur dont on veut initialiser les position
+ */
 void genDepartArrivee(Jeu *game){
     int j=0;
     for (j=0;j<game->nbPlayer;j++){//pour chaque joueur
@@ -188,6 +214,12 @@ void genDepartArrivee(Jeu *game){
         }while(depart == 0 || arrivee == 0);
     }
 }
+/**
+ * \fn void genObjet(Jeu *game)
+ * \brief donne une position aux ressource du jeu
+ *
+ * \param game Le jeu qui contient les ressources dont on veut generer la position
+ */
 void genObjet(Jeu *game){
     int nbRessourceVoulu = game->nbRessource;
     int nbCaseTake = 0, i;
@@ -221,6 +253,14 @@ void genObjet(Jeu *game){
 
 
 //Random
+/**
+ * \fn int rand_a_b(int a, int b)
+ * \brief genere un nombre entier aleatoire entre a et b
+ *
+ * \param a Limite basse
+ * \param b Limite haute
+ * \return le nombre generé
+ */
 int rand_a_b(int a, int b){
     return rand() % (b - a) + a;
 }
