@@ -136,7 +136,6 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     reallocChemin(chemin, actuel);
     //(*chemin) = realloc((*chemin), sizeof(char*)*(actuel+1));
     (*chemin)[actuel] = (char*)calloc(3, sizeof(char)); // {posX,posY,direction}
-    (*chemin)[actuel][2] = 'X';
     char directions[3] = {'X', 'X', 'X'};
     // essaie d'aller vers case X suivante.
     if(actuel>0){
@@ -177,37 +176,29 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
         }
     }
-    if((*chemin)[actuel][2] == 'X'){
-        char direction = 'G';
-        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
-            remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
-            char Abis[2] = {A[X]-1,A[Y]};
-            calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
-        }
-        direction = 'D';
-        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
-            remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
-            char Abis[2] = {A[X]+1,A[Y]};
-            calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
-        }
-        direction = 'B';
-        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
-            remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
-            char Abis[2] = {A[X],A[Y]+1};
-            calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
-        }
-        direction = 'H';
-        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
-            remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
-            char Abis[2] = {A[X],A[Y]-1};
-            calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
-        }
+    char direction = 'G';
+    if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
+        remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
+        char Abis[2] = {A[X]-1,A[Y]};
+        calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
     }
-    // Aucune direction n'a offert de solution : on remplace la valeur precedente
-    // du tableau pour que le chemin reste "invalide"
-    // On verifie en plus qu'il ne s'agit pas du point de depart (Si c'est le cas il y a un probleme)
-    if((*chemin)[actuel][2]=='X' && actuel>0){
-        (*chemin)[actuel-1][2] = 'X';
+    direction = 'D';
+    if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
+        remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
+        char Abis[2] = {A[X]+1,A[Y]};
+        calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
+    }
+    direction = 'B';
+    if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
+        remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
+        char Abis[2] = {A[X],A[Y]+1};
+        calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
+    }
+    direction = 'H';
+    if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
+        remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
+        char Abis[2] = {A[X],A[Y]-1};
+        calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
     }
     free((*chemin)[actuel]);
     return;

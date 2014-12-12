@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     opt.nbCaseX = 20;
     opt.nbCaseY = 15;
     opt.nbCaseLibre = (opt.nbCaseX*opt.nbCaseY)/3;
-    opt.nbRessource = 0;//3
+    opt.nbRessource = 3;//3
 
     /**Déclaration des options d'affichage*/
     OptionDAffichage optAffichage;
