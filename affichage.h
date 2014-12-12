@@ -12,6 +12,10 @@
 #define pathNameTileset  "Tiny32-Complete-Spritesheet-Repack3.png"
 
 
+/**
+ * \enum fctMenu
+ * \brief les demandes de lutilisateur par interaction
+ */
 typedef enum fctMenu{
     choixNull,
     quitter,
@@ -29,6 +33,14 @@ typedef enum fctMenu{
     int SPRITE_HEIGHT=clip.h;
 */
 
+/**
+ * \struct OptionDAffichage
+ * \brief Les options pour l'affichage
+ *
+ * origineMapX, origineMapY: origine de la carte, où elle est affiché sur lecran
+ * contourAffichee: si le coutour doit etre affiché
+ * automatique: si le deplacement du joueur se fait de manière automiatique
+ */
 typedef struct OptionDAffichage{
     int origineMapX;
     int origineMapY;

@@ -21,6 +21,14 @@ const SDL_Rect contourMap = {4*SPRITE_WIDTH,5*SPRITE_HEIGHT, SPRITE_WIDTH, SPRIT
 
 extern SDL_Rect* boutons;
 
+/**
+ * \fn void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game)
+ * \brief affichage complet du jeu
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu qu'on veut afficher
+ */
 void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
     ///Déclaration des variables///
     int i=0;
@@ -53,6 +61,17 @@ void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *g
 
         SDL_Flip(ecran); // Mise à jour de l'écran
 }
+/**
+ * \fn void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, char anciennePosition[2], int vitesse)
+ * \brief affichage du deplacement d'un joueur, la nouvelle position du joueur est donné dans sa structure par le parametre position[2]
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu qu'on veut afficher
+ * \param player Le joueur qui se deplace
+ * \param anciennePosition[2] La position du joueur avant son deplacement
+ * \param vitesse Nombre de milliseconde que la fonction met pour deplacer le joueur
+ */
 void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, char anciennePosition[2], int vitesse){
     ///Déclaration des variables///
     SDL_Surface *charset =  player->sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
@@ -116,6 +135,14 @@ void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
 
 }
 
+/**
+ * \fn void afficherMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game)
+ * \brief gère l'affichage de la carte du jeu
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu où est la carte qu'on veut afficher
+ */
 void afficherMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
     char y,x;
     for (y=0;y<game->nbCaseY;y++){
@@ -124,6 +151,16 @@ void afficherMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
         }
     }
 }
+/**
+ * \fn void afficherCase(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, int x, int y)
+ * \brief gère l'affichage d'une case de la carte du jeu celon sa position sur la carte
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu où est la carte qui contient la case qu'on veut afficher
+ * \param x Position x de la case sur la carte
+ * \param y Position y de la case sur la carte
+ */
 void afficherCase(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, int x, int y){
     SDL_Surface *textures; //IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png"); //load le tileset
     SDL_Color white = {255,255,255};
@@ -147,17 +184,36 @@ void afficherCase(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game,
         }
     }
 }
+/**
+ * \fn void afficherScore(SDL_Surface *ecran, Jeu *game)
+ * \brief gère l'affichage du score
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu où est le joueur dont on veut afficher le score
+ */
 void afficherScore(SDL_Surface *ecran, Jeu *game){
     SDL_Color white = {255,255,255};
     int i;
     for (i=0; i<game->nbPlayer; i++){ //multi joueur
         char affichageScore[20] = "Score";
-        if (game->nbPlayer>1){sprintf(affichageScore, "%s J%d", affichageScore, i+1);} //ajout du char joueur
-        int score = game->players[i]->sac[0];
+        int score
+        if (game->nbPlayer>1){ //ajout du char joueur
+            sprintf(affichageScore, "%s J%d", affichageScore, i+1);
+            score = game->players[i]->sac[0];
+        }else{score = game->nbTourPassee}
         sprintf(affichageScore, "%s: %d", affichageScore,score); //ajout du char score
         apply_text(SPRITE_WIDTH/4 + i*(32 + 192), SPRITE_HEIGHT/4, affichageScore, ecran, "Fonts/OCRAStd.otf", 20, white);
     }
 }
+/**
+ * \fn void afficherRessources(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game)
+ * \brief gère l'affichage des ressources
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu où sont les ressources qu'on veut afficher
+ */
 void afficherRessources(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
     SDL_Surface *textures; //load le tileset;
     int i;
@@ -170,6 +226,14 @@ void afficherRessources(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu 
    }
 }
 
+/**
+ * \fn void afficherContourMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game)
+ * \brief affiche le contour de la carte
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu qu'on veut afficher
+ */
 void afficherContourMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
     SDL_Surface *textures =  IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png"); //load le tileset
     char y = game->nbCaseY-1,x;
@@ -179,6 +243,13 @@ void afficherContourMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu 
     SDL_FreeSurface(textures); // On libère la surface
 }
 
+/**
+ * \fn SDL_Rect* afficherMenuRejouer(SDL_Surface *ecran)
+ * \brief affiche un menu avec les options rejouer, quitter et option
+ *
+ * \param optAffichage Les options d'affichage
+ * \return un tableau de SDL_Rect, chaque case contient les position et taille d'un des boutons
+ */
 SDL_Rect* afficherMenuRejouer(SDL_Surface *ecran){
     /**Déclaration des variables*/
     SDL_Surface *texte, *popup;
@@ -233,7 +304,16 @@ SDL_Rect* afficherMenuRejouer(SDL_Surface *ecran){
 
     return boutons;
 }
-SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt, int joueurSelect){//add: choix nb joueur, nb case libre, mode de jeu
+/**
+ * \fn SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt, int joueurSelect)
+ * \brief affiche un menu avec les options rejouer, quitter et option
+ *
+ * \param optAffichage Les options d'affichage
+ * \param opt Les options de jeu
+ * \param joueurSelect Le numero du joueur selectionné pour la modification de sont apparence
+ * \return un tableau de SDL_Rect, chaque case contient les position et taille d'un des boutons
+ */
+SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt, int joueurSelect){//add: choix nb case libre, mode de jeu
     /**Déclaration des variables*/
     SDL_Surface *texte;
     int popWidth = ecran->w, popHeight = ecran->h, marge = 32/4;
@@ -389,6 +469,17 @@ SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt, int joueurSelect){
     return boutons;
 }
 
+/**
+ * \fn char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, Option *opt)
+ * \brief gère les interaction avec lutilisateur a travers le clavier
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu dont on veut gerer levenement
+ * \param player Le joueur dont c'est le tour
+ * \param opt Les options de jeu
+ * \return l'action demandé par lutilisateur
+ */
 char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, Option *opt){
     /**Déclaration des variables*/
     char choix = choixNull;
@@ -452,6 +543,16 @@ char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game,
 
     return choix;
 }
+/**
+ * \fn char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt)
+ * \brief gère les interaction avec lutilisateur pour le menu de pause
+ *
+ * \param optAffichage Les options d'affichage
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param game Le jeu dont on veut gerer levenement
+ * \param opt Les options de jeu
+ * \return l'action demandé par lutilisateur
+ */
 char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt){
     /**Déclaration des variables*/
     SDL_Surface *ancienEcran = SDL_DisplayFormatAlpha(ecran);
@@ -514,6 +615,13 @@ char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
     SDL_FreeSurface(ancienEcran);
     return choix;
 }
+/**
+ * \fn void gestionMenuOption(SDL_Surface *ecran, Option *opt)
+ * \brief gère les interaction avec lutilisateur pour le menu option
+ *
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param opt Les options de jeu
+ */
 void gestionMenuOption(SDL_Surface *ecran, Option *opt){
     ///Déclaration des variables
     SDL_Surface *ancienEcran = SDL_DisplayFormatAlpha(ecran);
@@ -622,6 +730,16 @@ void gestionMenuOption(SDL_Surface *ecran, Option *opt){
 
     SDL_FreeSurface(ancienEcran);
 }
+/**
+ * \fn int gestionTextBox(int value, SDL_Surface *ecran, SDL_Rect zone, int limite)
+ * \brief gère les interaction avec lutilisateur pour la modifiation et laffichage d'un nombre
+ *
+ * \param value La valeur initiale
+ * \param ecran La surface sur laquelle on veut l'afficher
+ * \param zone L'endroit où on veut afficher le nombre
+ * \param limite Valeur maximum que peut prendre le nombre
+ * \return la nouvelle valeur
+ */
 int gestionTextBox(int value, SDL_Surface *ecran, SDL_Rect zone, int limite){
     /**Déclaration des variables*/
     SDL_Color white = {255,255,255};
@@ -719,26 +837,79 @@ int gestionTextBox(int value, SDL_Surface *ecran, SDL_Rect zone, int limite){
 
 
 //Dessin
+/**
+ * \fn void ligneHorizontale(int x, int y, int width, Uint32 couleur, SDL_Surface *surface)
+ * \brief affiche une ligne horizontale
+ *
+ * \param x Position x
+ * \param y Position y
+ * \param width Longueur de la ligne
+ * \param couleur Couleur de la ligne
+ * \param surface La surface sur laquelle on veut l'afficher
+ */
 void ligneHorizontale(int x, int y, int width, Uint32 couleur, SDL_Surface *surface){
   SDL_Rect rectTemp = {x,y,width,1};
   SDL_FillRect(surface, &rectTemp, couleur);
 }
+/**
+ * \fn void ligneVerticale(int x, int y, int height, Uint32 couleur, SDL_Surface *surface)
+ * \brief affiche une ligne verticale
+ *
+ * \param x Position x
+ * \param y Position y
+ * \param height Longueur de la ligne
+ * \param couleur Couleur de la ligne
+ * \param surface La surface sur laquelle on veut l'afficher
+ */
 void ligneVerticale(int x, int y, int height, Uint32 couleur, SDL_Surface *surface){
   SDL_Rect rectTemp = {x,y,1,height};
   SDL_FillRect(surface, &rectTemp, couleur);
 }
+/**
+ * \fn void rectangle(int x, int y, int width, int height, Uint32 couleur, SDL_Surface *surface)
+ * \brief affiche un rectangle
+ *
+ * \param x Position x
+ * \param y Position y
+ * \param width Longueur du rectangle
+ * \param height Largeur du rectangle
+ * \param couleur Couleur du rectangle
+ * \param surface La surface sur laquelle on veut l'afficher
+ */
 void rectangle(int x, int y, int width, int height, Uint32 couleur, SDL_Surface *surface){
     ligneHorizontale(x, y, width, couleur, surface);
     ligneHorizontale(x, y + height - 1, width, couleur, surface);
     ligneVerticale(x, y + 1, height - 2, couleur, surface);
     ligneVerticale(x + width - 1, y + 1, height - 2, couleur, surface);
 }
+/**
+ * \fn void apply_surface(int x, int y, SDL_Surface *source, SDL_Surface *destination, SDL_Rect *clip)
+ * \brief affiche une image
+ *
+ * \param x Position x
+ * \param y Position y
+ * \param source La surface qu'on veut afficher
+ * \param destination La surface sur laquelle on veut l'afficher
+ * \param clip Coontient la taille et position sur la surface qu'on veut afficher de la partie qu'on veut afficher
+ */
 void apply_surface(int x, int y, SDL_Surface *source, SDL_Surface *destination, SDL_Rect *clip){
     SDL_Rect offset = {.x = x, .y = y};
 
     //On blitte la surface
     SDL_BlitSurface(source, clip, destination, &offset);
 }
+/**
+ * \fn void apply_text(int x, int y, char* txt, SDL_Surface *destination, char* filePolice, int taille, SDL_Color couleur)
+ * \brief affiche un texte
+ *
+ * \param x Position x
+ * \param y Position y
+ * \param txt Le tetx a afficher
+ * \param destination La surface sur laquelle on veut l'afficher
+ * \param filePolice La police qu'on veut pour le texte
+ * \param taille La taille qu'on veut pour le texte
+ * \param couleur Couleur du texte
+ */
 void apply_text(int x, int y, char* txt, SDL_Surface *destination, char* filePolice, int taille, SDL_Color couleur){
     TTF_Init(); //Démarrage de SDL_ttf
     TTF_Font *police = TTF_OpenFont(filePolice, taille); //Charger la police

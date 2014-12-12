@@ -4,6 +4,16 @@
 
 #include "ressource.h"
 
+/**
+ * \struct Joueur
+ * \brief Toutes les données necessaire pour un joueur
+ *
+ * arrivee: position darrivée
+ * sprite: image
+ * orientation: orientation actuelle
+ * position: position actuelle
+ * sac: ressources ramassées
+ */
 typedef struct Joueur {
     char arrivee[2];
     Sprite* sprite;
@@ -13,6 +23,10 @@ typedef struct Joueur {
     int nbRessources;
 }Joueur;
 
+/**
+ * \enum Orientation
+ * \brief Orientation dun joueur
+ */
 typedef enum Orientation{
     bas,
     gauche,
