@@ -271,7 +271,7 @@ char comparerArrete(Arrete* premiere, Arrete* deuxieme){
         return 'O';
    } else if(premiere->B[0]==deuxieme->B[0] &&
              premiere->B[1]==deuxieme->B[1] ){
-        deuxieme = inverserPoints(deuxieme);
+        deuxieme = inverserArrete(deuxieme);
         return 'O';
    } else {
        return 'N';
@@ -279,8 +279,13 @@ char comparerArrete(Arrete* premiere, Arrete* deuxieme){
 }
 
 /**
-    Inverse le contenu du chemin (Ordre et direction)
-*/
+ * \fn char* inverserChemin(char* chemin, char taille)
+ * \brief Fonction d'inversion du chemin d'une Arrete.
+ *
+ * \param chemin Chemin à inverser.
+ * \param taille Taille du chemin à inverser.
+ * \return Retourne le nouveau chemin.
+ */
 char* inverserChemin(char* chemin, char taille){
     char* nouveauChemin = (char*)calloc(taille, sizeof(char));
     int i;
@@ -299,10 +304,15 @@ char* inverserChemin(char* chemin, char taille){
     free(chemin);
     return nouveauChemin;
 }
+
 /**
-    Inverse les points A et B dans une arrete.
-*/
-Arrete* inverserPoints(Arrete* arrete){
+ * \fn Arrete* inverserArrete(Arrete* arrete)
+ * \brief Fonction d'inversion des points et du chemin d'une Arrete.
+ *
+ * \param arrete Arrete à inverser.
+ * \return Retourne l'Arrete inversée.
+ */
+Arrete* inverserArrete(Arrete* arrete){
     char temp;
 
     temp = arrete->A[0];
@@ -319,32 +329,42 @@ Arrete* inverserPoints(Arrete* arrete){
 }
 
 /**
-    Tri le tableau du chemin pour mettre dans l'ordre depuis l'arrete
-    avec la position du joueur a l'arrete avec l'arrivee.
-*/
-Arrete** trierChemin(Arrete** tab, int nbArretes){
+ * \fn Arrete** ordonnerChemin(Arrete** chemin, int taille)
+ * \brief Fonction de rangement du chemin du point de départ à l'arrivée.
+ *
+ * \param chemin Chemin à ordonner.
+ * \param taille Taille du chemin.
+ * \return Retourne le tableau du chemin ordonné.
+ */
+Arrete** ordonnerChemin(Arrete** chemin, int taille){
     int i, j, k;
     char rappel = 0;
     // boucle pour trouver l'arrete suivante, la placer a la suite
     // et continuer jusqu'a avoir range l'arbre.
-    for(i = 1 ; i < nbArretes ; i++){
-        for(j = i ; j < nbArretes ; j++){
-            if(comparerArrete(tab[i-1], tab[j])=='O'){
-                Arrete* arreteTemp = tab[i];
-                tab[i] = tab[j];
-                tab[j] = arreteTemp;
+    for(i = 1 ; i < taille ; i++){
+        for(j = i ; j < taille ; j++){
+            if(comparerArrete(chemin[i-1], chemin[j])=='O'){
+                Arrete* arreteTemp = chemin[i];
+                chemin[i] = chemin[j];
+                chemin[j] = arreteTemp;
             }
         }
     }
-    return tab;
+    return chemin;
 }
 
 /**
-    Algorithme de resolution du chemin le plus court.
-    Algorithme base sur la Theorie des Graphes.
-    Retourne un tableau d'Arretes ordonnees, correspondant au chemin
-    a effectuer.
-*/
+ * \fn Arrete** algorithmeChemin(Joueur *joueur, Ressource **ressources, int nbRessources, const Case*** carte, char nbCases[2])
+ * \brief Fonction principale de l'algorithme. Liste les Arrete existantes et cherche le chemin le plus court
+ * \brief entre le joueur et l'arrivée, en passant par chacune des ressources.
+ *
+ * \param joueur Joueur pour lequel on calcule.
+ * \param ressources Liste des ressources disponibles.
+ * \param nbRessources Nombre de ressources.
+ * \param carte Ensemble des cases.
+ * \param nbCases Nombre de cases en X et Y.
+ * \return Retourne le tableau du chemin ordonné.
+ */
 Arrete** algorithmeChemin(Joueur *joueur, Ressource **ressources, int nbRessources, const Case*** carte, char nbCases[2]){
     // Pas de ressources : on va directement au point d'arrivee.
     if(nbRessources == 0){
@@ -408,7 +428,7 @@ Arrete** algorithmeChemin(Joueur *joueur, Ressource **ressources, int nbRessourc
 
     // Tri du reste du chemin.
 
-    chemin = trierChemin(chemin, nbRessources+1);
+    chemin = ordonnerChemin(chemin, nbRessources+1);
 
     chemin = copieChemin(chemin, nbRessources+1);
     ///!!! Free des elements avant ou juste free du tableau direct ?
@@ -425,102 +445,96 @@ Arrete** algorithmeChemin(Joueur *joueur, Ressource **ressources, int nbRessourc
 }
 
 /**
-    Retourne 1 s'il existe une boucle entre le point d'index j et le point d'index k
-    dans le chemin actuel.
-*/
-char boucle(EtatPosition** etatPositions, int nbPositions, int j, int k, Arrete** chemin, int nb){
-    int i;
-    for(i = 0 ; i < nb ; i++){
-        if( (evaluerPosition(chemin[i]->A, etatPositions[j]) != 'N') && // Arrete A -> B
-            (getEtatPosition(chemin[i]->B, etatPositions, nbPositions)->flagVerif == 0) ){ // point cible qui n'a pas deja ete vu (eviter de boucler sur la meme arrete
-            if( evaluerPosition(chemin[i]->B, etatPositions[k]) != 'N'){ // On retrouve k sur le point cible, c'est une boucle.
-               return 1;
-            } else { // Sinon on regarde le point suivant
-                etatPositions[j]->flagVerif = 1;
-                return boucle(etatPositions, nbPositions, indexEtat(chemin[i]->B, etatPositions, nbPositions), k, chemin, nb);
-            }
-        }
-        if( (evaluerPosition(chemin[i]->B, etatPositions[j]) != 'N') && // Arrete B -> A
-            (getEtatPosition(chemin[i]->A, etatPositions, nbPositions)->flagVerif == 0) ){ // point qui n'a pas deja ete vu
-            if( evaluerPosition(chemin[i]->A, etatPositions[k]) != 'N' ){ // On retrouve k sur le point cible, c'est une boucle.
-               return 1;
-            } else { // Sinon on regarde le point suivant
-                etatPositions[j]->flagVerif = 1;
-                return boucle(etatPositions, nbPositions, indexEtat(chemin[i]->A, etatPositions, nbPositions), k, chemin, nb);
-            }
-        }
-    }
-    return 0;
-}
-
-/**
-    Retourne 1 s'il existe un chemin entre le point actuel et l'extremite donnee
-*/
-char chaine(EtatPosition* posExtremite, EtatPosition* posActuel, EtatPosition** etatPositions, Arrete** chemin, int nbPositions, int nb){
-    if( comparerEtats(posActuel, posExtremite) ){ // Si on est rendu au point cible il y a une chaine
+ * \fn char chaine(EtatPosition* B, EtatPosition* A, EtatPosition** etatPositions, Arrete** chemin, int nbPositions, int tailleChemin)
+ * \brief Fonction de recherche d'une chaine entre A et B dans un chemin d'Arrete.
+ *
+ * \param B Etat du point B.
+ * \param A Etat du point A.
+ * \param etatPositions Liste des points et leurs états.
+ * \param chemin Chemin d'Arrete.
+ * \param nbPositions Nombre de points.
+ * \param tailleChemin Taille du chemin.
+ * \return Retourne 1 s'il existe un chemin entre A et B, sinon 0.
+ */
+char chaine(EtatPosition* B, EtatPosition* A, EtatPosition** etatPositions, Arrete** chemin, int nbPositions, int tailleChemin){
+    if( comparerEtats(A, B) ){ // Si on est rendu au point cible il y a une chaine
         return 1;
     }
     int i;
-    for(i = 0 ; i < nb ; i++){
-        if( (evaluerPosition(chemin[i]->A, posActuel) != 'N') &&
+    for(i = 0 ; i < tailleChemin ; i++){
+        if( (evaluerPosition(chemin[i]->A, A) != 'N') &&
             (getEtatPosition(chemin[i]->B, etatPositions, nbPositions)->flagVerif == 0) ){ // Arrete A -> B
-            posActuel->flagVerif = 1;
-            return chaine(posExtremite, getEtatPosition(chemin[i]->B, etatPositions, nbPositions), etatPositions, chemin, nbPositions, nb);
+            A->flagVerif = 1;
+            return chaine(B, getEtatPosition(chemin[i]->B, etatPositions, nbPositions), etatPositions, chemin, nbPositions, tailleChemin);
         }
-        if( (evaluerPosition(chemin[i]->B, posActuel) != 'N') &&
+        if( (evaluerPosition(chemin[i]->B, A) != 'N') &&
             (getEtatPosition(chemin[i]->A, etatPositions, nbPositions)->flagVerif == 0) ){ // Arrete B -> A
-            posActuel->flagVerif = 1;
-            return chaine(posExtremite, getEtatPosition(chemin[i]->A, etatPositions, nbPositions), etatPositions, chemin, nbPositions, nb);
+            A->flagVerif = 1;
+            return chaine(B, getEtatPosition(chemin[i]->A, etatPositions, nbPositions), etatPositions, chemin, nbPositions, tailleChemin);
         }
     }
     // Aucune arrete trouvee. Pas de chaine.
     return 0;
 }
 
-char estBoucle(EtatPosition** etatPositions, int nbPositions, int j, int k, Arrete** chemin, int nb){
-    char ret = boucle(etatPositions,nbPositions,j,k,chemin,nb);
-    resetFlag(etatPositions, nbPositions);
-    return ret;
-}
-
-char estChaine(EtatPosition* posExtremite, EtatPosition* posActuel, EtatPosition** etatPositions, Arrete** chemin, int nbPositions, int nb){
-    char ret = chaine(posExtremite, posActuel, etatPositions, chemin, nbPositions, nb);
+/**
+ * \fn char estChaine(EtatPosition* posExtremite, EtatPosition* posActuelle, EtatPosition** etatPositions, Arrete** chemin, int nbPositions, int tailleChemin)
+ * \brief Fonction d'appel de recherche d'une chaine entre A et B dans un chemin d'Arrete. Remet à zéro les flags après recherche.
+ *
+ * \param posExtremite Etat du point cible.
+ * \param posActuelle Etat du point d'origine.
+ * \param etatPositions Liste des points et leurs états.
+ * \param chemin Chemin d'Arrete.
+ * \param nbPositions Nombre de points.
+ * \param tailleChemin Taille du chemin.
+ * \return Retourne 1 s'il existe un chemin entre l'origine et la cible, sinon 0.
+ */
+char estChaine(EtatPosition* posExtremite, EtatPosition* posActuelle, EtatPosition** etatPositions, Arrete** chemin, int nbPositions, int nb){
+    char ret = chaine(posExtremite, posActuelle, etatPositions, chemin, nbPositions, nb);
     resetFlag(etatPositions, nbPositions);
     return ret;
 }
 
 /**
-    Retourne 1 si l'arrete entre le point a l'index j et le point a l'index k est valide
-    => Verifie que l'arrete n'implique pas de boucle ou de fermeture du chemin
-*/
-char arreteValide(EtatPosition** etatPositions, int nbPositions, int j, int k, Arrete** chemin, int nb){
+ * \fn char arreteValide(EtatPosition** etatPositions, int nbPositions, int j, int k, Arrete** chemin, int nb)
+ * \brief Fonction de vérification de la validité d'une Arrete : aucune fermeture du chemin sans inclure tous les points.
+ *
+ * \param etatPositions Liste des points et leurs états.
+ * \param nbPositions Nombre de points.
+ * \param idxA Index de l'état du point A de l'Arrete.
+ * \param idxB Index de l'état du point B de l'Arrete.
+ * \param chemin Chemin d'Arrete.
+ * \param tailleChemin Taille du chemin.
+ * \return Retourne 1 s'il existe un chemin entre l'origine et la cible, sinon 0.
+ */
+char arreteValide(EtatPosition** etatPositions, int nbPositions, int idxA, int idxB, Arrete** chemin, int tailleChemin){
     int i;
-    if(j > 1 && k > 1) { // j et k sont des index de ressources on verifie les boucles
+    if(idxA > 1 && idxB > 1) { // j et k sont des index de ressources on verifie les boucles
         for(i = 2 ; i < nbPositions ; i++){
-            if(i != j && k != i){ // On analyse l'etat des autres ressources (le cas j<2 && k<2 est impossible)
+            if(i != idxA && idxB != i){ // On analyse l'etat des autres ressources (le cas j<2 && k<2 est impossible)
                 if((etatPositions[i]->flagAvance) < 2){ // S'il existe au moins une ressource libre
-                    if( ( estChaine(etatPositions[0], etatPositions[j], etatPositions, chemin, nbPositions, nb) ||
-                          estChaine(etatPositions[1], etatPositions[j], etatPositions, chemin, nbPositions, nb) )
+                    if( ( estChaine(etatPositions[0], etatPositions[idxA], etatPositions, chemin, nbPositions, tailleChemin) ||
+                          estChaine(etatPositions[1], etatPositions[idxA], etatPositions, chemin, nbPositions, tailleChemin) )
                         && // Fermeture du chemin (chaque point de l'arrete fait une chaine jsuqu'à l'extemite
-                        ( estChaine(etatPositions[0], etatPositions[k], etatPositions, chemin, nbPositions, nb) ||
-                          estChaine(etatPositions[1], etatPositions[k], etatPositions, chemin, nbPositions, nb) ) ) {
+                        ( estChaine(etatPositions[0], etatPositions[idxB], etatPositions, chemin, nbPositions, tailleChemin) ||
+                          estChaine(etatPositions[1], etatPositions[idxB], etatPositions, chemin, nbPositions, tailleChemin) ) ) {
                         return 0;
                     }  else {
-                        return !estBoucle(etatPositions,nbPositions,j,k,chemin,nb);
+                        return !estChaine(etatPositions[idxA], etatPositions[idxB], etatPositions, chemin, nbPositions, tailleChemin);
                     }
                 }
             }
         }
-        return !estBoucle(etatPositions,nbPositions,j,k,chemin,nb);
+        return !estChaine(etatPositions[idxA], etatPositions[k], etatPositions, chemin, nbPositions, tailleChemin);
     } else { // Au moins un des points est une extremite
         for(i = 2 ; i < nbPositions ; i++){
-            if(i != j && k != i){ // On analyse l'etat des autres ressources (le cas j<2 && k<2 est impossible)
+            if(i != idxA && idxB != i){ // On analyse l'etat des autres ressources (le cas j<2 && k<2 est impossible)
                 if((etatPositions[i]->flagAvance) < 2){ // S'il existe au moins une ressource libre
-                    if(j < 2) { // Si j est extremite on regarde que notre ressource (k) ne ferme pas le chemin
-                        return !estChaine(etatPositions[!j], etatPositions[k], etatPositions, chemin, nbPositions, nb);
+                    if(idxA < 2) { // Si j est extremite on regarde que notre ressource (k) ne ferme pas le chemin
+                        return !estChaine(etatPositions[!idxA], etatPositions[idxB], etatPositions, chemin, nbPositions, tailleChemin);
                     }
                     else { // Sinon on regarde que j ne ferme pas le chemin
-                        return !estChaine(etatPositions[!k], etatPositions[j], etatPositions, chemin, nbPositions, nb);
+                        return !estChaine(etatPositions[!idxB], etatPositions[idxA], etatPositions, chemin, nbPositions, tailleChemin);
                     }
                 }
             }
@@ -529,9 +543,19 @@ char arreteValide(EtatPosition** etatPositions, int nbPositions, int j, int k, A
     return 1;
 }
 
+/**
+ * \fn Arrete** cheminPlusCourt(Arrete** tabArretes, EtatPosition** etatPositions, int nbArretes, int nbRessources)
+ * \brief Fonction de recherche du chemin le plus court avec une liste donnée d'Arrete.
+ *
+ * \param tabArretes Liste totale des Arrete disponibles
+ * \param etatPositions Liste des points et leurs états.
+ * \param nbArretes Nombre total d'Arrete
+ * \param nbRessources Nombre total de Ressource
+ * \return Retourne la liste d'Arrete consitutant le chemin le plus court.
+ */
 Arrete** cheminPlusCourt(Arrete** tabArretes, EtatPosition** etatPositions, int nbArretes, int nbRessources){
     Arrete** chemin = (Arrete**)malloc(sizeof(Arrete*)*nbRessources+1);
-    int i, j, k, nb =0;
+    int i, j, k, tailleChemin =0;
     for(i = 0 ; i < nbArretes ; i++){ // Parcours  des arretes
         for(j=0; j < nbRessources+2;j++){ // Parcours des etats pour le point A
             if( ((tabArretes[i]->A[0]) == (etatPositions[j]->posX)) &&
@@ -540,8 +564,8 @@ Arrete** cheminPlusCourt(Arrete** tabArretes, EtatPosition** etatPositions, int 
                     if( ((tabArretes[i]->B[0]) == (etatPositions[k]->posX)) &&
                         ((tabArretes[i]->B[1]) == (etatPositions[k]->posY)) ){
                         if( ((etatPositions[j]->flagAvance) < 2) && ((etatPositions[k]->flagAvance) < 2)
-                           && (arreteValide(etatPositions,nbRessources+2,j,k,chemin,nb)) ){
-                            chemin[nb] = tabArretes[i];nb++;
+                           && (arreteValide(etatPositions,nbRessources+2,j,k,chemin,tailleChemin)) ){
+                            chemin[nb] = tabArretes[i];tailleChemin++;
                             etatPositions[j]->flagAvance++;
                             etatPositions[k]->flagAvance++;
                             break;
@@ -551,12 +575,19 @@ Arrete** cheminPlusCourt(Arrete** tabArretes, EtatPosition** etatPositions, int 
                 break;
             }
         }
-        if(nb > nbRessources)
+        if(tailleChemin > nbRessources)
             break;
     }
     return chemin;
 }
 
+/**
+ * \fn Arrete* copieArrete(Arrete* arrete)
+ * \brief Fonction de copie d'une Arrete vers une nouvelle adresse mémoire.
+ *
+ * \param arrete Arrete à copier.
+ * \return Retourne un pointeur sur la nouvelle adresse.
+ */
 Arrete* copieArrete(Arrete* arrete){
     Arrete* arreteRetour = (Arrete*)malloc(sizeof(Arrete));
     arreteRetour->A[0] = arrete->A[0];
@@ -572,10 +603,18 @@ Arrete* copieArrete(Arrete* arrete){
     return arreteRetour;
 }
 
-Arrete** copieChemin(Arrete** chemin, int size){
-    Arrete** cheminRetour = (Arrete**)malloc(sizeof(Arrete*)*size);
+/**
+ * \fn Arrete** copieChemin(Arrete** chemin, int taille)
+ * \brief Fonction de copie d'un chemin et ses Arrete vers une nouvelle adresse mémoire.
+ *
+ * \param chemin Chemin à copier.
+ * \param taille Taille du chemin à copier.
+ * \return Retourne le nouveau chemin.
+ */
+Arrete** copieChemin(Arrete** chemin, int taille){
+    Arrete** cheminRetour = (Arrete**)malloc(sizeof(Arrete*)*taille);
     int i, j;
-    for(i = 0 ; i < size ; i++){
+    for(i = 0 ; i < taille ; i++){
         cheminRetour[i] = copieArrete(chemin[i]);
     }
     return cheminRetour;
