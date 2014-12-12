@@ -138,13 +138,13 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     (*chemin)[actuel] = (char*)calloc(3, sizeof(char)); // {posX,posY,direction}
     (*chemin)[actuel][2] = 'X';
     char directions[3] = {'X', 'X', 'X'};
-    /// essaie d'aller vers case X suivante.
+    // essaie d'aller vers case X suivante.
     if(actuel>0){
         directions[2] = (*chemin)[actuel-1][2];
     }
     if(A[X]<B[X] && directions[2]!='G'){
         directions[0] = 'D';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        // Si ok, Appelle algo depuis la nouvelle case avec actuel++.
         if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[0])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[0]);
             char Abis[2] = {A[X]+1,A[Y]};
@@ -152,17 +152,17 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
         }
     } else if (A[X]>B[X] && directions[2]!='D'){
         directions[0] = 'G';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        // Si ok, Appelle algo depuis la nouvelle case avec actuel++.
         if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[0])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[0]);
             char Abis[2] = {A[X]-1,A[Y]};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
         }
     }
-    /// essaie d'aller vers case Y suivante.
+    // essaie d'aller vers case Y suivante.
     if(A[Y]>B[Y] && directions[2]!='B'){
         directions[1] = 'H';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        // Si ok, Appelle algo depuis la nouvelle case avec actuel++.
         if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[1])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[1]);
             char Abis[2] = {A[X],A[Y]-1};
@@ -170,7 +170,7 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
         }
     } else if (A[Y]<B[Y] && directions[2]!='H'){
         directions[1] = 'B';
-        /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
+        // Si ok, Appelle algo depuis la nouvelle case avec actuel++.
         if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[1])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[1]);
             char Abis[2] = {A[X],A[Y]+1};
@@ -326,7 +326,6 @@ char testPosition(char position[2], const Case*** carte, char nbCases[2],
  * \return Retourne le tableau avec la nouvelle Arrete.
  */
 Arrete** trierArretes(Arrete **tab, int nbArretes, Arrete *aRanger){
-    ///memset();
     int i, j;
     for(i = 0 ; i < nbArretes ; i++){
         if(tab[i]==0){
