@@ -11,7 +11,7 @@ Sprite sprTerre = {.pathName = pathNameTileset, .clip = {11*SPRITE_WIDTH,4*SPRIT
 Sprite sprHerbe = {.pathName = pathNameTileset, .clip = {15*SPRITE_WIDTH,1*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT}, .nbImageAnim = 1};
 const Sprite gems = {.pathName = pathNameTileset, .clip = {10*SPRITE_WIDTH,9*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT}, .nbImageAnim = 1};
 const SDL_Rect imgArrivee = {4*SPRITE_WIDTH,4*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};//8,13
-const SDL_Rect contourMap = {4*SPRITE_WIDTH,5*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};//4,5//7,7 //y max, x 1 xmax-1
+const SDL_Rect contourMap = {4*SPRITE_WIDTH,5*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT};//4,5//7,7
 
  Sprite araignee = {.pathName = pathNameTileset,.clip = {9*SPRITE_WIDTH,12*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT}, .nbImageAnim = 3};
  Sprite squelette = {.pathName = pathNameTileset,.clip = {6*SPRITE_WIDTH,8*SPRITE_HEIGHT, SPRITE_WIDTH, SPRITE_HEIGHT}, .nbImageAnim = 3};
@@ -22,89 +22,95 @@ const SDL_Rect contourMap = {4*SPRITE_WIDTH,5*SPRITE_HEIGHT, SPRITE_WIDTH, SPRIT
 extern SDL_Rect* boutons;
 
 void affichageInitial(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
-    /**Déclaration des variables*/
-    SDL_Surface *charset =  game->J1.sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
-
-    //orientation perso
-    SDL_Rect clip = game->J1.sprite->clip;
-    clip.y += game->J1.orientation * game->J1.sprite->clip.h;
-    clip.x = game->J1.sprite->clip.x;
+    ///Déclaration des variables///
+    int i=0;
 
 
     SDL_FillRect(ecran, NULL, SDL_MapRGB(ecran->format, 119, 181, 254)); //couleur de fond de la fenetre
-    /**On applique les sprites sur l'écran*/
-        /**affichage map*/
+    ///On applique les sprites sur l'écran///
+        ///affichage map///
         afficherMap(optAffichage, ecran, game);
-        /**affichage ressources*/
+        ///affichage ressources///
         afficherRessources(optAffichage, ecran, game);
-        /**affichage perso*/
-        apply_surface((game->J1.position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->J1.position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT-game->J1.sprite->clip.h+SPRITE_HEIGHT, charset, ecran, &clip);
-        /**affichage score*/
+        ///affichage perso///
+        for (i=0; i<game->nbPlayer; i++){ //pour chaque joueur
+            SDL_Surface *charset =  game->players[i]->sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
+
+            //orientation perso
+            SDL_Rect clip = game->players[i]->sprite->clip;
+            clip.y += game->players[i]->orientation * game->players[i]->sprite->clip.h;
+            clip.x = game->players[i]->sprite->clip.x;
+
+            apply_surface((game->players[i]->position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->players[i]->position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT-game->players[i]->sprite->clip.h+SPRITE_HEIGHT, charset, ecran, &clip);
+        }
+        ///affichage score///
         afficherScore(ecran, game);
 
-        /**affichage monde flottant*/
+        ///affichage monde flottant///
         if (optAffichage->contourAffichee == 1){
             afficherContourMap(optAffichage, ecran, game);
         }
 
         SDL_Flip(ecran); // Mise à jour de l'écran
 }
-
-void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, char anciennePosition[2], int vitesse){
-    /**Déclaration des variables*/
-    SDL_Surface *charset =  game->J1.sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
+void afficherDpl(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, char anciennePosition[2], int vitesse){
+    ///Déclaration des variables///
+    SDL_Surface *charset =  player->sprite->image; //IMG_Load(game->J1.sprite->pathName); //load le charset
     char i,x,y;
     int tempsActuel, tempsPrecedent;
     SDL_Event event;
 
     //orientation perso
-    /**Déplacement du joueur*/
+    ///Déplacement du joueur///
     char dplJoueur[2];
-    dplJoueur[0] = game->J1.position[0] - anciennePosition[0];
-    dplJoueur[1] = game->J1.position[1] - anciennePosition[1];
+    dplJoueur[0] = player->position[0] - anciennePosition[0];
+    dplJoueur[1] = player->position[1] - anciennePosition[1];
 
-    SDL_Rect clip = game->J1.sprite->clip;
+    SDL_Rect clip = player->sprite->clip;
     if(dplJoueur[0]!=0){//1:d:+2, -1:g:+1
-        game->J1.orientation = (1+dplJoueur[0])/2+1;
+        player->orientation = (1+dplJoueur[0])/2+1;
     }else if(dplJoueur[1]!=0){//1:b:0, -1:h:3
-        game->J1.orientation = (1-dplJoueur[1])*3/2;
+        player->orientation = (1-dplJoueur[1])*3/2;
     }
-    clip.y += game->J1.orientation * game->J1.sprite->clip.h;
+    clip.y += player->orientation * player->sprite->clip.h;
 
-    /**On applique les sprites sur l'écran*/
-    int nbImageAnim = game->J1.sprite->nbImageAnim;
+    ///On applique les sprites sur l'écran///
+    int nbImageAnim = player->sprite->nbImageAnim;
     for (i=1; i<=nbImageAnim; i++){
-        /**affichage map*/
-        for (y=0;y<=game->J1.sprite->clip.h/SPRITE_HEIGHT;y++){//add: arrondir au nb superieur
-                for(x=-(game->J1.sprite->clip.w/(2*SPRITE_WIDTH)-1/2);x<=game->J1.sprite->clip.w/(2*SPRITE_WIDTH)-1/2;x++){//add: arrondir au nb superieur
+        ///affichage map///(clipping)
+        for (y=0;y<=player->sprite->clip.h/SPRITE_HEIGHT;y++){//add: arrondir au nb superieur
+                for(x=-(player->sprite->clip.w/(2*SPRITE_WIDTH)-1/2);x<=player->sprite->clip.w/(2*SPRITE_WIDTH)-1/2;x++){//add: arrondir au nb superieur
                     afficherCase(optAffichage, ecran, game,  anciennePosition[0]+x, anciennePosition[1]-y);
-                    afficherCase(optAffichage, ecran, game,  game->J1.position[0]+x, game->J1.position[1]-y);
+                    afficherCase(optAffichage, ecran, game,  player->position[0]+x, player->position[1]-y);
                 }
         }
 
+
+        //effacement de laffichage du background precedent//marche uniquement en monde flottant... -> generaliser
+        //utilisé pour rafrechir score et img perso qui depasse des case de la map
         SDL_Surface *background = SDL_CreateRGBSurface(SDL_HWSURFACE, ecran->w, SPRITE_HEIGHT, 32, 0, 0, 0, 0);
-        SDL_FillRect(background, NULL, SDL_MapRGB(ecran->format, 119, 181, 254));
+        SDL_FillRect(background, NULL, SDL_MapRGB(ecran->format, 119, 181, 254)); //couleur de fond de la fenetre
         apply_surface(optAffichage->origineMapX-1, optAffichage->origineMapY-1, background, ecran, NULL);
 
-        /**affichage ressources*/
+        ///affichage ressources///
         afficherRessources(optAffichage, ecran, game);
-        /**affichage perso*/
+        ///affichage perso///
         //changement clip
         if (dplJoueur[0]!=0 || dplJoueur[1]!=0){
-            clip.x = game->J1.sprite->clip.x+i*SPRITE_WIDTH;
-            if(i==nbImageAnim){clip.x = game->J1.sprite->clip.x;}
+            clip.x = player->sprite->clip.x+i*SPRITE_WIDTH;
+            if(i==nbImageAnim){clip.x = player->sprite->clip.x;}
         }
-        apply_surface((anciennePosition[0]*nbImageAnim+dplJoueur[0]*i)*SPRITE_WIDTH/nbImageAnim+SPRITE_WIDTH/2-game->J1.sprite->clip.w/2 + optAffichage->origineMapX*SPRITE_WIDTH, (anciennePosition[1]*nbImageAnim+dplJoueur[1]*i)*SPRITE_HEIGHT/nbImageAnim-game->J1.sprite->clip.h+SPRITE_HEIGHT + optAffichage->origineMapY*SPRITE_HEIGHT, charset, ecran, &clip);
-        /**affichage score*/
+        apply_surface((anciennePosition[0]*nbImageAnim+dplJoueur[0]*i)*SPRITE_WIDTH/nbImageAnim+SPRITE_WIDTH/2-player->sprite->clip.w/2 + optAffichage->origineMapX*SPRITE_WIDTH, (anciennePosition[1]*nbImageAnim+dplJoueur[1]*i)*SPRITE_HEIGHT/nbImageAnim-player->sprite->clip.h+SPRITE_HEIGHT + optAffichage->origineMapY*SPRITE_HEIGHT, charset, ecran, &clip);
+        ///affichage score///
         afficherScore(ecran, game);
 
         SDL_Flip(ecran); // Mise à jour de l'écran
 
-        /**Temporisation*/
+        ///Temporisation///
         tempsPrecedent = SDL_GetTicks();
         do{
-                SDL_PollEvent(&event);
-                tempsActuel = SDL_GetTicks();
+            SDL_PollEvent(&event);
+            tempsActuel = SDL_GetTicks();
         }while(tempsActuel - tempsPrecedent < vitesse/nbImageAnim); //dpl fini en "vitesse" ms
     }
 
@@ -121,39 +127,47 @@ void afficherMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
 void afficherCase(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, int x, int y){
     SDL_Surface *textures; //IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png"); //load le tileset
     SDL_Color white = {255,255,255};
+    char affichageCase[3]="A";
     if (x>=0 && x<game->nbCaseX && y>=0 && y<game->nbCaseY){ //demande daffichage des cases si elles existe
-        textures =  game->map[x][y]->sprite->image;
+        textures = game->map[x][y]->sprite->image;
 
         apply_surface((x + optAffichage->origineMapX)*SPRITE_WIDTH, (y + optAffichage->origineMapY)*SPRITE_HEIGHT, textures, ecran, &game->map[x][y]->sprite->clip); //0->(SCREEN_WIDTH/SPRITE_WIDTH)-1
 
         /**affichage case d'arrivee*/
-        if(game->J1.arrivee[0] == x && game->J1.arrivee[1] == y){
-            textures = IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png");
-            apply_surface((x + optAffichage->origineMapX)*SPRITE_WIDTH, (y + optAffichage->origineMapY)*SPRITE_HEIGHT, textures, ecran, &imgArrivee);
-            rectangle((x + optAffichage->origineMapX)*SPRITE_WIDTH,(y + optAffichage->origineMapY)*SPRITE_HEIGHT,SPRITE_WIDTH, SPRITE_HEIGHT, white, ecran); //contour de la case
-            apply_text((x + optAffichage->origineMapX)*SPRITE_WIDTH, (y + optAffichage->origineMapY)*SPRITE_HEIGHT, "A", ecran, "Fonts/OCRAStd.otf", 20, white);
-            SDL_FreeSurface(textures); // On libère la surface
+        int i;
+        for (i=0; i<game->nbPlayer; i++){ //multi joueur
+            if(game->players[i]->arrivee[0] == x && game->players[i]->arrivee[1] == y){
+                textures = IMG_Load("Tiny32-Complete-Spritesheet-Repack3.png");
+                apply_surface((x + optAffichage->origineMapX)*SPRITE_WIDTH, (y + optAffichage->origineMapY)*SPRITE_HEIGHT, textures, ecran, &imgArrivee);
+                rectangle((x + optAffichage->origineMapX)*SPRITE_WIDTH,(y + optAffichage->origineMapY)*SPRITE_HEIGHT,SPRITE_WIDTH, SPRITE_HEIGHT, white, ecran); //contour de la case
+                if (game->nbPlayer>1){sprintf(affichageCase, "%s%d", affichageCase, i+1);} //ajout du char joueur
+                apply_text((x + optAffichage->origineMapX)*SPRITE_WIDTH, (y + optAffichage->origineMapY)*SPRITE_HEIGHT, affichageCase, ecran, "Fonts/OCRAStd.otf", 20, white);
+                SDL_FreeSurface(textures); // On libère la surface
+            }
         }
     }
 }
 void afficherScore(SDL_Surface *ecran, Jeu *game){
     SDL_Color white = {255,255,255};
-    //TTF_SetFontOutline(police, 1);
-    char affichageScore[20] = "Score";
-    //if (joueur.length>1){sprintf(affichageScore, "%s J%d", affichageScore, numJoueur);} //ajout du char joueur
-    int score = game->J1.sac[0];
-    sprintf(affichageScore, "%s: %d", affichageScore,score); //ajout du char score
-    apply_text(SPRITE_WIDTH/4, SPRITE_HEIGHT/4, affichageScore, ecran, "Fonts/OCRAStd.otf", 20, white);
+    int i;
+    for (i=0; i<game->nbPlayer; i++){ //multi joueur
+        char affichageScore[20] = "Score";
+        if (game->nbPlayer>1){sprintf(affichageScore, "%s J%d", affichageScore, i+1);} //ajout du char joueur
+        int score = game->players[i]->sac[0];
+        sprintf(affichageScore, "%s: %d", affichageScore,score); //ajout du char score
+        apply_text(SPRITE_WIDTH/4 + i*(32 + 192), SPRITE_HEIGHT/4, affichageScore, ecran, "Fonts/OCRAStd.otf", 20, white);
+    }
 }
-
 void afficherRessources(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
     SDL_Surface *textures; //load le tileset;
     int i;
     for (i=0; i < game->nbRessource; i++){
-        textures =  IMG_Load(game->ressources[i]->image->pathName); //load le tileset
-        apply_surface((game->ressources[i]->position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->ressources[i]->position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT, textures, ecran, &game->ressources[i]->image->clip);
-        SDL_FreeSurface(textures); //On libère la surface
-    }
+        if (game->ressources[i] !=NULL){
+            textures =  IMG_Load(game->ressources[i]->image->pathName); //load le tileset
+            apply_surface((game->ressources[i]->position[0] + optAffichage->origineMapX)*SPRITE_WIDTH, (game->ressources[i]->position[1] + optAffichage->origineMapY)*SPRITE_HEIGHT, textures, ecran, &game->ressources[i]->image->clip);
+            SDL_FreeSurface(textures); //On libère la surface
+        }
+   }
 }
 
 void afficherContourMap(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game){
@@ -219,7 +233,7 @@ SDL_Rect* afficherMenuRejouer(SDL_Surface *ecran){
 
     return boutons;
 }
-SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt){//add: choix nb joueur, nb case libre, mode de jeu
+SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt, int joueurSelect){//add: choix nb joueur, nb case libre, mode de jeu
     /**Déclaration des variables*/
     SDL_Surface *texte;
     int popWidth = ecran->w, popHeight = ecran->h, marge = 32/4;
@@ -239,14 +253,52 @@ SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt){//add: choix nb jo
     apply_surface(16, 16, texte, ecran, NULL);
 
     police = TTF_OpenFont("Fonts/OCRAStd.otf", 16); //Charger la police
-    /**Zone apparence du joueur*/
+
+    /**Zone nombre de joueurs*/
     int firstMarge = 16 + texte->w + marge;
     int positionX = firstMarge;
     int positionY = 16+texte->h +4* marge;
+    char affichageNb[21+3+1] = "Nombre de joueurs: ";
+    texte = TTF_RenderText_Blended(police, affichageNb, white);
+    apply_surface(positionX, positionY, texte, ecran, NULL);
+    positionX +=texte->w+marge;
+    sprintf(affichageNb, "%d",opt->nbJoueur);
+    texte = TTF_RenderText_Blended(police, affichageNb, white);
+    apply_surface(positionX, positionY, texte, ecran, NULL);
+    //position du bouton
+    boutons[6].x = positionX;
+    boutons[6].y = positionY;
+    boutons[6].w = texte->w;
+    boutons[6].h = texte->h;
+
+    /**Zone apparence du joueur*/
+    positionX = firstMarge;
+    positionY += texte->h + 2*marge;
     texte = TTF_RenderText_Blended(police, "Apparence du joueur: ", white);
     apply_surface(positionX, positionY, texte, ecran, NULL);
+    //btn player
+    if (opt->nbJoueur>1){
+        int i=0;
+        boutons = realloc(boutons, (7 + opt->nbJoueur) * sizeof(SDL_Rect));//reallocation
+        for (i=0; i<opt->nbJoueur; i++){
+            positionX +=texte->w+marge;
+            sprintf(affichageNb, "J%d",i+1); //ajout du char score
+            texte = TTF_RenderText_Blended(police, affichageNb, white);
+            apply_surface(positionX, positionY, texte, ecran, NULL);
+            //position du bouton
+            boutons[i+7].x = positionX;
+            boutons[i+7].y = positionY;
+            boutons[i+7].w = texte->w;
+            boutons[i+7].h = texte->h;
+            //affichage du joueur selectionné
+            if (joueurSelect == i){
+                rectangle(boutons[i+7].x,boutons[i+7].y,boutons[i+7].w, boutons[i+7].h, white, ecran); //contour de la case
+            }
+        }
+    }
     //image charset
-    positionX +=texte->w+marge;
+    positionX = firstMarge;
+    positionY += texte->h + 2*marge;
     SDL_Surface *charset =  IMG_Load(araignee.pathName); //load le charset
     apply_surface(positionX, positionY, charset, ecran, &araignee.clip);
     //position du bouton
@@ -274,19 +326,18 @@ SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt){//add: choix nb jo
     boutons[2].h = charset->h/4;
 
     //affichage de l'apparence selectionné
-    if (opt->sprite == &araignee){
+    if (opt->sprites[joueurSelect] == &araignee){
         rectangle(boutons[0].x,boutons[0].y,boutons[0].w, boutons[0].h, white, ecran); //contour de la case
-    }else if (opt->sprite == &squelette){
+    }else if (opt->sprites[joueurSelect] == &squelette){
         rectangle(boutons[1].x,boutons[1].y,boutons[1].w, boutons[1].h, white, ecran); //contour de la case
-    }else if (opt->sprite == &farmer){
+    }else if (opt->sprites[joueurSelect] == &farmer){
         rectangle(boutons[2].x,boutons[2].y,boutons[2].w, boutons[2].h, white, ecran); //contour de la case
     }
 
     /**Zone nombre de ressources*/
     positionX = firstMarge;
     positionY += charset->h/4 + 2*marge;
-    police = TTF_OpenFont("Fonts/OCRAStd.otf", 16); //Charger la police
-    char affichageNb[21+4] = "Nombre de ressources: ";
+    sprintf(affichageNb, "Nombre de ressources: ");
     texte = TTF_RenderText_Blended(police, affichageNb, white);
     apply_surface(positionX, positionY, texte, ecran, NULL);
     positionX +=texte->w+marge;
@@ -338,13 +389,24 @@ SDL_Rect* afficherMenuOption(SDL_Surface *ecran, Option *opt){//add: choix nb jo
     return boutons;
 }
 
-char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt){
+char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Joueur* player, Option *opt){
     /**Déclaration des variables*/
     char choix = choixNull;
     SDL_Event event;
+    int tempsPrecedent = SDL_GetTicks();
+    int tempsActuel;
 
-    /*do{SDL_WaitEvent(&event);
+    do{
+        if(optAffichage->automatique == 0){
+            SDL_WaitEvent(&event);
+        }else{
+            //temporisation
+            SDL_PollEvent(&event);
+            tempsActuel = SDL_GetTicks();
+        }
         if (event.type == SDL_KEYDOWN){
+                    Arrete aTemp;
+                    aTemp.C = (char*)malloc(sizeof(char)*1);
             switch(event.key.keysym.sym){
                 case SDLK_ESCAPE:
                     choix = gestionMenu(optAffichage, ecran, game, opt);
@@ -352,32 +414,42 @@ char gestionEvent(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game,
                 case SDLK_r:
                     choix = rejouer;
                     break;
+                case SDLK_p:
+                    choix = automatique;
+                    optAffichage->automatique = 1;
+                    break;
                 case SDLK_UP:
-                    game->J1.position[1] -= 1;
+                    //player->position[1] -= 1;
+                    aTemp.C[0] = 'H';
+                    aTemp.D = 1;
+                    jouerTour(game, player, &aTemp);
                     break;
                 case SDLK_DOWN:
-                    game->J1.position[1] += 1;
+                    //player->position[1] += 1;
+                    aTemp.C[0] = 'B';
+                    aTemp.D = 1;
+                    jouerTour(game, player, &aTemp);
                     break;
                 case SDLK_LEFT:
-                    game->J1.position[0] -= 1;
+                    //player->position[0] -= 1;
+                    aTemp.C[0] = 'G';
+                    aTemp.D = 1;
+                    jouerTour(game, player, &aTemp);
                     break;
                 case SDLK_RIGHT:
-                    game->J1.position[0] += 1;
+                    //player->position[0] += 1;
+                    aTemp.C[0] = 'D';
+                    aTemp.D = 1;
+                    jouerTour(game, player, &aTemp);
                     break;
                 default:
                     break;
             }
             if (event.key.keysym.sym != SDLK_ESCAPE && event.key.keysym.sym != SDLK_r){choix = play;} //key autre que escape et "r"
+            if(optAffichage->automatique == 1 && choix==NULL){choix=play;}
         }else if (event.type == SDL_QUIT){choix = quitter;} //fermer
-    }while(choix==choixNull);*/
+    }while((choix==choixNull) && (optAffichage->automatique == 0||(optAffichage->automatique == 1 && tempsActuel - tempsPrecedent < 250)));
 
-    //temporisation
-    int tempsPrecedent = SDL_GetTicks();
-    int tempsActuel;
-    do{
-        SDL_PollEvent(&event);
-        tempsActuel = SDL_GetTicks();
-    }while(tempsActuel - tempsPrecedent < 250); // Si 1000 ms au moins se sont écoulées
     return choix;
 }
 char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, Option *opt){
@@ -410,6 +482,7 @@ char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
                         break;
                     case SDLK_o:
                         gestionMenuOption(ecran,opt);
+                        boutons = afficherMenuRejouer(ecran);//reinitialiser boutons
                         break;
                     default:
                         break;
@@ -421,6 +494,7 @@ char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
                         choix = rejouer;
                     }else if(event.button.x>=boutons[1].x && event.button.x<=boutons[1].x+boutons[1].w && event.button.y>=boutons[1].y && event.button.y<=boutons[1].y+boutons[1].h){
                         gestionMenuOption(ecran,opt);
+                        boutons = afficherMenuRejouer(ecran);//reinitialiser boutons
                     }else if(event.button.x>=boutons[2].x && event.button.x<=boutons[2].x+boutons[2].w && event.button.y>=boutons[2].y && event.button.y<=boutons[2].y+boutons[2].h){
                         choix = quitter;
                     }else{//clic en dehors d boutons
@@ -441,13 +515,15 @@ char gestionMenu(OptionDAffichage *optAffichage, SDL_Surface *ecran, Jeu *game, 
     return choix;
 }
 void gestionMenuOption(SDL_Surface *ecran, Option *opt){
-    /**Déclaration des variables*/
+    ///Déclaration des variables
     SDL_Surface *ancienEcran = SDL_DisplayFormatAlpha(ecran);
     char choix = choixNull;
     SDL_Color white = {255,255,255};
     Uint32 whiteRect = {255,255,255};
     SDL_Event event;
-    boutons = afficherMenuOption(ecran, opt);
+    int apparenceActive=0;
+    boutons = afficherMenuOption(ecran, opt, apparenceActive);
+    int i;
 
     do{SDL_WaitEvent(&event);
                     switch(event.type){
@@ -475,14 +551,14 @@ void gestionMenuOption(SDL_Surface *ecran, Option *opt){
                         case SDL_MOUSEBUTTONUP:
                             if (event.button.button == SDL_BUTTON_LEFT){
                                 if(event.button.x>=boutons[0].x && event.button.x<=boutons[0].x+boutons[0].w && event.button.y>=boutons[0].y && event.button.y<=boutons[0].y+boutons[0].h){
-                                    opt->sprite = &araignee;
-                                    afficherMenuOption(ecran, opt);
+                                    opt->sprites[apparenceActive] = &araignee;
+                                    afficherMenuOption(ecran, opt, apparenceActive);
                                 }else if(event.button.x>=boutons[1].x && event.button.x<=boutons[1].x+boutons[1].w && event.button.y>=boutons[1].y && event.button.y<=boutons[1].y+boutons[1].h){
-                                    opt->sprite = &squelette;
-                                    afficherMenuOption(ecran, opt);
+                                    opt->sprites[apparenceActive] = &squelette;
+                                    afficherMenuOption(ecran, opt, apparenceActive);
                                 }else if(event.button.x>=boutons[2].x && event.button.x<=boutons[2].x+boutons[2].w && event.button.y>=boutons[2].y && event.button.y<=boutons[2].y+boutons[2].h){
-                                    opt->sprite = &farmer;
-                                    afficherMenuOption(ecran, opt);
+                                    opt->sprites[apparenceActive] = &farmer;
+                                    afficherMenuOption(ecran, opt, apparenceActive);
                                 }else if(event.button.x>=boutons[3].x && event.button.x<=boutons[3].x+boutons[3].w && event.button.y>=boutons[3].y && event.button.y<=boutons[3].y+boutons[3].h){
                                     opt->nbRessource = gestionTextBox(opt->nbRessource, ecran, boutons[3], opt->nbCaseLibre);
                                 }else if(event.button.x>=boutons[4].x && event.button.x<=boutons[4].x+boutons[4].w && event.button.y>=boutons[4].y && event.button.y<=boutons[4].y+boutons[4].h){
@@ -493,29 +569,47 @@ void gestionMenuOption(SDL_Surface *ecran, Option *opt){
                                     opt->nbCaseLibre = (opt->nbCaseX*opt->nbCaseY)/3;
                                 }else if(event.button.x>=0 && event.button.x<=32*4 && event.button.y>=0 && event.button.y<=32*3/2){//clic sur le titre "Option"
                                     choix=4;
+                                }else if(event.button.x>=boutons[6].x && event.button.x<=boutons[6].x+boutons[6].w && event.button.y>=boutons[6].y && event.button.y<=boutons[6].y+boutons[6].h){
+                                    int ancienNbJoueur = opt->nbJoueur;
+                                    opt->nbJoueur = gestionTextBox(opt->nbJoueur, ecran, boutons[6], 9);
+                                    afficherMenuOption(ecran, opt, apparenceActive);
+                                    opt->sprites = realloc(opt->sprites, opt->nbJoueur * sizeof(Sprite));//reallocation
+                                    for(i=ancienNbJoueur;i<opt->nbJoueur;i++){
+                                        opt->sprites[i]=&farmer;
+                                    }
+                                }else if (opt->nbJoueur>1){
+                                    for(i=0;i<opt->nbJoueur;i++){
+                                        if(event.button.x>=boutons[i+7].x && event.button.x<=boutons[i+7].x+boutons[i+7].w && event.button.y>=boutons[i+7].y && event.button.y<=boutons[i+7].y+boutons[i+7].h){
+                                            apparenceActive = i;
+                                            afficherMenuOption(ecran, opt, apparenceActive);
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                             break;
                         case SDL_MOUSEMOTION:
-                                if(event.button.x>=boutons[0].x && event.button.x<=boutons[0].x+boutons[0].w && event.button.y>=boutons[0].y && event.button.y<=boutons[0].y+boutons[0].h){
-                                    rectangle(boutons[0].x,boutons[0].y,boutons[0].w, boutons[0].h, white, ecran); //contour de la case
+                            for(i=0;i<7;i++){
+                                if(event.button.x>=boutons[i].x && event.button.x<=boutons[i].x+boutons[i].w && event.button.y>=boutons[i].y && event.button.y<=boutons[i].y+boutons[i].h){
+                                    rectangle(boutons[i].x,boutons[i].y,boutons[i].w, boutons[i].h, white, ecran); //contour de la case
                                     SDL_Flip(ecran); // Mise à jour de l'écran
-                                }else if(event.button.x>=boutons[1].x && event.button.x<=boutons[1].x+boutons[1].w && event.button.y>=boutons[1].y && event.button.y<=boutons[1].y+boutons[1].h){
-                                    rectangle(boutons[1].x,boutons[1].y,boutons[1].w, boutons[1].h, white, ecran); //contour de la case
-                                    SDL_Flip(ecran); // Mise à jour de l'écran
-                                }else if(event.button.x>=boutons[2].x && event.button.x<=boutons[2].x+boutons[2].w && event.button.y>=boutons[2].y && event.button.y<=boutons[2].y+boutons[2].h){
-                                    rectangle(boutons[2].x,boutons[2].y,boutons[2].w, boutons[2].h, white, ecran); //contour de la case
-                                    SDL_Flip(ecran); // Mise à jour de l'écran
-                                }else if(event.button.x>=boutons[3].x && event.button.x<=boutons[3].x+boutons[3].w && event.button.y>=boutons[3].y && event.button.y<=boutons[3].y+boutons[3].h){
-                                    rectangle(boutons[3].x,boutons[3].y,boutons[3].w, boutons[3].h, white, ecran); //contour de la case
-                                    SDL_Flip(ecran); // Mise à jour de l'écran
-                                }else if(event.button.x>=boutons[4].x && event.button.x<=boutons[4].x+boutons[4].w && event.button.y>=boutons[4].y && event.button.y<=boutons[4].y+boutons[4].h){
-                                    rectangle(boutons[4].x,boutons[4].y,boutons[4].w, boutons[4].h, white, ecran); //contour de la case
-                                    SDL_Flip(ecran); // Mise à jour de l'écran
-                                }else if(event.button.x>=boutons[5].x && event.button.x<=boutons[5].x+boutons[5].w && event.button.y>=boutons[5].y && event.button.y<=boutons[5].y+boutons[5].h){
-                                    rectangle(boutons[5].x,boutons[5].y,boutons[5].w, boutons[5].h, white, ecran); //contour de la case
-                                    SDL_Flip(ecran); // Mise à jour de l'écran
-                                }else{afficherMenuOption(ecran, opt);}
+                                    break;
+                                }
+                            }
+                            if (i==7){
+                                if (opt->nbJoueur>1){
+                                    for(i=0;i<opt->nbJoueur;i++){
+                                        if(event.button.x>=boutons[i+7].x && event.button.x<=boutons[i+7].x+boutons[i+7].w && event.button.y>=boutons[i+7].y && event.button.y<=boutons[i+7].y+boutons[i+7].h){
+                                            rectangle(boutons[i+7].x,boutons[i+7].y,boutons[i+7].w, boutons[i+7].h, white, ecran); //contour de la case
+                                            SDL_Flip(ecran); // Mise à jour de l'écran
+                                            break;
+                                        }
+                                    }
+                                    if (i==opt->nbJoueur){afficherMenuOption(ecran, opt, apparenceActive);}
+                                }else{
+                                    afficherMenuOption(ecran, opt, apparenceActive);
+                                }
+                            }
                             break;
                         default:
                             break;

@@ -1,6 +1,8 @@
-#include "jeu.h"
+#include "Jeu.h"
 
-
+extern  Sprite araignee; //const//enlevé pour permettre que le load des images ne soit fait quune fois
+extern  Sprite squelette;
+extern  Sprite farmer;
 extern  Case caseHerbe;
 extern  Case caseTerre;
 extern const Sprite gems;
@@ -23,17 +25,22 @@ char jouerTour(Jeu *game, Joueur *player, Arrete *arrete) { // Un tour (pour le 
     return (arrete->D == 0) ? 'F' : 'T';
 }
 
+
 void execution(){} // Appell� depuis le main. Cr�� affichage/joueur/etc... // options a ajouter en argument
 
 static Ressource* ressourcesTemp;
+static Joueur* playersTemp;
 
 void new_Game(Jeu *game, Option *defaut){
+    ///Initialisation des paramètres du jeu///
     game->nbCaseX = defaut->nbCaseX;//.nbCaseX =50//fullscreen
     game->nbCaseY = defaut->nbCaseY;//.nbCaseY =28//fullscreen
     game->nbRessource = defaut->nbRessource;
-
+    game->nbPlayer = defaut->nbJoueur;
+    ///Allocations///
     //allocation temp
-    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp));//sizeof(Ressource)
+    ressourcesTemp = malloc(game->nbRessource * sizeof(*ressourcesTemp)); //sizeof(Ressource)
+    playersTemp = malloc(game->nbPlayer * sizeof(*playersTemp)); //sizeof(Ressource)
     //allocation map
     int i;
     game->map = malloc(game->nbCaseX * sizeof(*game->map));
@@ -41,7 +48,10 @@ void new_Game(Jeu *game, Option *defaut){
         game->map[i] = malloc(game->nbCaseY * sizeof(**game->map));
     }
     //allocation ressources
-    game->ressources = malloc(game->nbRessource * sizeof(Ressource));
+    game->ressources = malloc(game->nbRessource * sizeof(Ressource*));
+    //allocation joueurs
+    game->players = malloc(game->nbPlayer * sizeof(Joueur*));
+    ///Initialisations///
     //initialisation map
     int j;
     for (i=0; i<game->nbCaseX;i++){
@@ -53,14 +63,21 @@ void new_Game(Jeu *game, Option *defaut){
     for (j=0; j<game->nbRessource;j++){
         game->ressources[j] = &ressourcesTemp[j];
     }
-    //initilisation joueur
-    game->J1.sac[0] = 0;
+    //initialisation joueurs
+    for (j=0;j<game->nbPlayer;j++){
+        game->players[j] = &playersTemp[j];
+        game->players[j]->sprite = defaut->sprites[j]; //choix de l'apparence du joueur
+        game->players[j]->orientation = bas;
+        game->players[j]->sac[0]=0;
+    }
 }
 void free_Jeu(Jeu *game){
     int i;
     // Libération mémoire des temp
     free(ressourcesTemp);
     ressourcesTemp = NULL;
+    free(playersTemp);
+    playersTemp = NULL;
     // Libération mémoire map
     for (i=0; i<game->nbCaseX; i++)
     {
@@ -72,107 +89,104 @@ void free_Jeu(Jeu *game){
     // Libération mémoire ressources
     free(game->ressources);
     game->ressources = NULL;
+    // Libération mémoire joueurs
+    free(game->players);
+    game->players = NULL;
 }
 
 
 void genTerrain(Jeu *game, int nbCaseLibreVoulu){
+    //Déclaration des variables
     int nbCaseTake = 0;
+    char x,y;
 
-    char i,j;
-
-    for (i=0; i<game->nbCaseX; i++){
-        for (j=0; j<game->nbCaseY; j++){
-            //initialisation
-            game->map[i][j] = &caseHerbe;//pointe sur une case infranchissable
+    ///Initialisation des cases en infranchissable///
+    for (x=0; x<game->nbCaseX; x++){
+        for (y=0; y<game->nbCaseY; y++){
+            game->map[x][y] = &caseHerbe;//pointe sur une case infranchissable
         }
     }
-    //generation chemin coherent
-    //case de depart au hasard
+    ///generation chemin coherent///
+    //case de depart
 	char dX = rand_a_b(0,game->nbCaseX);
 	char dY = rand_a_b(0,game->nbCaseY);
 	game->map[dX][dY] = &caseTerre;//pointe sur une case libre
     nbCaseTake ++;
 
-        char xx,yy,nb, nbAnc;
-    do{//take une case autour au hasard
-        do{
-        nb=0;
-        for (xx = -1; xx <= 1; xx++) {
-			yy = abs(xx)-1;
-			if (((dX + xx)>=0) && ((dX + xx)<game->nbCaseX) && ((dY + yy)>=0) && ((dY + yy)<game->nbCaseY)) {
-			    if(game->map[dX + xx][dY + yy]->type != libre){
-                    nb++;
-			    }
-			}
-			yy = 1 - abs(xx);
-			if (yy != abs(xx)-1 && (dX + xx)>=0 && (dX + xx)<game->nbCaseX && (dY + yy)>=0 && (dY + yy)<game->nbCaseY) {
-			    if(game->map[dX + xx][dY + yy]->type != libre){
-                    nb++;
-			    }
-			}
-		}
-        nbAnc = nb;
-		if(nbAnc == 0){
-            do{
-                dX = rand_a_b(0,game->nbCaseX);
-                dY = rand_a_b(0,game->nbCaseY);
+    do{
+        //Déclaration des variables
+        char nbCases;
+        char** q;
+        q = malloc(0 * sizeof(*q));
 
-            }while(game->map[dX][dY]->type != libre);
-		}
-        }while(nbAnc == 0);
-
-        char q[nbAnc][2];
-        //case valide a coté de la case depart
-        for ( xx = -1; xx <= 1; xx++) {
-			yy = abs(xx)-1;
-			if ((dX + xx)>=0 && (dX + xx)<game->nbCaseX && (dY + yy)>=0 && (dY + yy)<game->nbCaseY) {
-			    if(game->map[dX + xx][dY + yy]->type != libre){
-
-			    nb--;
-			    q[nb][0] = dX + xx;
-			    q[nb][1] = dY + yy;
-			    }
-			}
-			yy = 1 - abs(xx);
-			if (yy != abs(xx)-1 && (dX + xx)>=0 && (dX + xx)<game->nbCaseX && (dY + yy)>=0 && (dY + yy)<game->nbCaseY) {
-			    if(game->map[dX + xx][dY + yy]->type != libre){
-
-			    nb--;
-			    q[nb][0] = dX + xx;
-			    q[nb][1] = dY + yy;
-			    }
-			}
-		}
-
-        char index = rand_a_b(0,nbAnc);
+        //take une case autour au hasard
+        do{//recherche du nb de case possible autour
+            nbCases=0;
+            for (x = -1; x <= 1; x++) {//recherche dans les 4 positions autour de la case de depart
+                y = abs(x)-1;
+                if (((dX + x)>=0) && ((dX + x)<game->nbCaseX) && ((dY + y)>=0) && ((dY + y)<game->nbCaseY)) {//in terrain
+                    if(game->map[dX + x][dY + y]->type != libre){//is not alerady libre
+                        nbCases++;
+                        q = realloc(q, nbCases * sizeof(*q));//reallocation
+                        q[nbCases-1] = malloc(2 * sizeof(**q));
+                        //remplissage du tableau
+                        q[nbCases-1][0] = dX + x;
+                        q[nbCases-1][1] = dY + y;
+                    }
+                }
+                y = 1 - abs(x);
+                if (y != abs(x)-1 && (dX + x)>=0 && (dX + x)<game->nbCaseX && (dY + y)>=0 && (dY + y)<game->nbCaseY) {//in terrain
+                    if(game->map[dX + x][dY + y]->type != libre){//is not alerady libre
+                        nbCases++;
+                        q = realloc(q, nbCases * sizeof(*q));//reallocation
+                        q[nbCases-1] = malloc(2 * sizeof(**q));
+                        //remplissage du tableau
+                        q[nbCases-1][0] = dX + x;
+                        q[nbCases-1][1] = dY + y;
+                    }
+                }
+            }
+            if(nbCases == 0){//aucune case non deja prise et dans le terrain
+                do{//on selec une autre case libre
+                    dX = rand_a_b(0,game->nbCaseX);
+                    dY = rand_a_b(0,game->nbCaseY);
+                }while(game->map[dX][dY]->type != libre);
+            }
+        }while(nbCases == 0);
+        ///Choix de la case suivante///
+        char index = rand_a_b(0,nbCases);
         dX = q[index][0];
         dY = q[index][1];
         game->map[dX][dY] = &caseTerre;
         nbCaseTake ++;
+
+        free(q);
     }while(nbCaseTake < nbCaseLibreVoulu); //nb de case accessible voulu
 }
 void genDepartArrivee(Jeu *game){
+    int j=0;
+    for (j=0;j<game->nbPlayer;j++){//pour chaque joueur
+        char depart = 0, arrivee = 0; //bool existe pas en c, c dla merde
 
-    char depart = 0, arrivee = 0; //bool existe pas en c, c dla merde
+        char dX, dY;
+        do{
+            //case au hasard
+            dX = rand_a_b(0,game->nbCaseX);
+            dY = rand_a_b(0,game->nbCaseY);
 
-    char	dX, dY;
-    do{
-        //case au hasard
-        dX = rand_a_b(0,game->nbCaseX);
-        dY = rand_a_b(0,game->nbCaseY);
-
-        if (game->map[dX][dY]->type == libre){ //si case libre
-            if (depart == 0){
-                game->J1.position[0] = dX;
-                game->J1.position[1] = dY;
-                depart = 1;
-            }else{
-                game->J1.arrivee[0] = dX;
-                game->J1.arrivee[1] = dY;
-                arrivee = 1;
+            if (game->map[dX][dY]->type == libre){ //si case libre
+                if (depart == 0){
+                    game->players[j]->position[0] = dX;
+                    game->players[j]->position[1] = dY;
+                    depart = 1;
+                }else{
+                    game->players[j]->arrivee[0] = dX;
+                    game->players[j]->arrivee[1] = dY;
+                    arrivee = 1;
+                }
             }
-        }
-    }while(depart == 0 || arrivee == 0);
+        }while(depart == 0 || arrivee == 0);
+    }
 }
 void genObjet(Jeu *game){
     int nbRessourceVoulu = game->nbRessource;
