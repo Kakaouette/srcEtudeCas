@@ -5,7 +5,7 @@
 
 void reallocChemin(char*** chemin, int actuel);
 void remplirChemin(char posX, char posY, char* tab, char direction);
-char testChemin(char position[2], const Case*** carte, char nbCases[2], int actuel, char** chemin, char direction);
+char testPosition(char position[2], const Case*** carte, char nbCases[2], int actuel, char** chemin, char direction);
 void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char*** chemin, char** meilleurChemin);
 
 Arrete* inverserPoints(Arrete* arrete);
@@ -17,5 +17,6 @@ Arrete** trierChemin(Arrete* (*tab), int nbArretes);
 Arrete** algorithmeChemin(Joueur *joueur, Ressource* (*ressources), int nbRessources, const Case*** carte, char nbCases[2]);
 Arrete** cheminPlusCourt(Arrete** tabArretes, EtatPosition** etatPositions, int nbArretes, int nbRessources);
 Arrete** copieChemin(Arrete** chemin, int size);
+Arrete* copieArrete(Arrete* arrete);
 
 #endif // ALGORITHME_H

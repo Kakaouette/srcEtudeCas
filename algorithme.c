@@ -4,6 +4,13 @@
 #define Y 1
 #define directionExiste ((directions[0]==direction)||(directions[1]==direction)||(directions[2]==direction))
 
+/**
+ * \fn void reallocChemin(char*** chemin, int actuel)
+ * \brief Fonction de reallocation du chemin.
+ *
+ * \param chemin Pointeur du tableau à modifier.
+ * \param actuel Taille actuelle du chemin et donc du tableau.
+ */
 void reallocChemin(char*** chemin, int actuel){
     char** cheminBis = (char**)malloc(sizeof(char*)*actuel);
     int i;
@@ -26,20 +33,71 @@ void reallocChemin(char*** chemin, int actuel){
     free(cheminBis);
 }
 
+/**
+ * \fn void remplirChemin(char posX, char posY, char* cheminActuel, char direction)
+ * \brief Fonction de remplissage d'une ligne du chemin.
+ *
+ * \param posX Position X à ajouter.
+ * \param posY Position Y à ajouter.
+ * \param cheminActuel Ligne actuelle à remplir.
+ * \param direction Direction à ajouter (H/B/G/D)
+ */
 void remplirChemin(char posX, char posY, char* cheminActuel, char direction){
     cheminActuel[0] = posX;
     cheminActuel[1] = posY;
     cheminActuel[2] = direction;
 }
 
-char testChemin(char position[2], const Case*** carte, char nbCases[2],
+/**
+ * \fn char comparePosition(char *positionA, char *positionB)
+ * \brief Fonction de comparaison de deux positions.
+ *
+ * \param positionA Position A à comparer.
+ * \param positionB Position B à comparer.
+ * \return 1 si positions identiques, sinon 0.
+ */
+char comparePosition(char *positionA, char *positionB){
+    if((positionA[0] == positionB[0]) && (positionA[1] == positionB[1])){
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * \fn char testPosition(char position[2], const Case*** carte, char nbCases[2], int actuel, char** chemin, char direction)
+ * \brief Fonction de test d'une position (Case) cible. Vérifie que la Case est franchissable
+ * \brief et qu'elle n'a pas été franchie dans le chemin actuel (boucle).
+ *
+ * \param position Position actuelle.
+ * \param carte Ensemble des cases.
+ * \param nbCases Nombre de cases en X et Y.
+ * \param actuel Avancée actuelle du chemin.
+ * \param chemin Chemin actuel.
+ * \param direction Direction dans laquelle on souhaite se déplacer.
+ * \return 1 si déplacement valide dans cette direction, sinon 0.
+ */
+char testPosition(char position[2], const Case*** carte, char nbCases[2],
                 int actuel, char** chemin, char direction){
     int i;
+    char nouvellePosition[2];
+    nouvellePosition[X] = position[X];
+    nouvellePosition[Y] = position[Y];
+    switch (direction) {
+        case 'H':
+            nouvellePosition[Y]--; break;
+        case 'B':
+            nouvellePosition[Y]++; break;
+        case 'G':
+            nouvellePosition[X]--; break;
+        case 'D':
+            nouvellePosition[X]++; break;
+    }
     // Test la case cible
     if(testDeplacement(carte, nbCases, position, direction)){
         // Test que la case n'est pas déjà présente dans le chemin
         for(i = 0 ; i < actuel ; i++){
-            if((position[X] == chemin[i][X]) && (position[Y] == chemin[i][Y])){
+            if(comparePosition(nouvellePosition, chemin[i])){
                 return 0;
             }
         }
@@ -49,6 +107,19 @@ char testChemin(char position[2], const Case*** carte, char nbCases[2],
     }
 }
 
+/**
+ * \fn void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2], int actuel, int *meilleur, char*** chemin, char** meilleurChemin)
+ * \brief Fonction de calcul du chemin valide le plus court d'un point A à un point B.
+ *
+ * \param A Position actuelle.
+ * \param B Position cible.
+ * \param carte Ensemble des cases.
+ * \param nbCases Nombre de cases en X et Y.
+ * \param actuel Avancée actuelle du chemin.
+ * \param meilleur Distance la plus courte trouvée.
+ * \param chemin Chemin actuel.
+ * \param meilleurChemin Meilleur chemin trouvé.
+ */
 void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
                   int actuel, int *meilleur, char*** chemin, char** meilleurChemin){
     // Limitation de l execution si on ne trouve pas de chemin plus court on abandonne
@@ -56,7 +127,7 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
         return;
     }
     // Rendu a l objectif on remplace les valeurs de meilleur distance et chemin
-    if( (A[X] == B[X]) && (A[Y] == B[Y]) ){
+    if(comparePosition(A, B)){
         *meilleur = actuel;
         int i;
         free(*meilleurChemin);
@@ -83,7 +154,7 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     if(A[X]<B[X] && directions[2]!='G'){
         directions[0] = 'D';
         /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(testChemin(A, carte, nbCases, actuel, (*chemin), directions[0])){
+        if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[0])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[0]);
             char Abis[2] = {A[X]+1,A[Y]};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
@@ -91,7 +162,7 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     } else if (A[X]>B[X] && directions[2]!='D'){
         directions[0] = 'G';
         /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(testChemin(A, carte, nbCases, actuel, (*chemin), directions[0])){
+        if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[0])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[0]);
             char Abis[2] = {A[X]-1,A[Y]};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
@@ -101,7 +172,7 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     if(A[Y]>B[Y] && directions[2]!='B'){
         directions[1] = 'H';
         /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(testChemin(A, carte, nbCases, actuel, (*chemin), directions[1])){
+        if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[1])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[1]);
             char Abis[2] = {A[X],A[Y]-1};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
@@ -109,7 +180,7 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     } else if (A[Y]<B[Y] && directions[2]!='H'){
         directions[1] = 'B';
         /// Si ok, Appelle algo depuis la nouvelle case avec actuel++.
-        if(testChemin(A, carte, nbCases, actuel, (*chemin), directions[1])){
+        if(testPosition(A, carte, nbCases, actuel, (*chemin), directions[1])){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], directions[1]);
             char Abis[2] = {A[X],A[Y]+1};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
@@ -117,25 +188,25 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
     }
     if((*chemin)[actuel][2] == 'X'){
         char direction = 'G';
-        if(!directionExiste && testChemin(A, carte, nbCases, actuel, (*chemin), direction)){
+        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
             char Abis[2] = {A[X]-1,A[Y]};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
         }
         direction = 'D';
-        if(!directionExiste && testChemin(A, carte, nbCases, actuel, (*chemin), direction)){
+        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
             char Abis[2] = {A[X]+1,A[Y]};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
         }
         direction = 'B';
-        if(!directionExiste && testChemin(A, carte, nbCases, actuel, (*chemin), direction)){
+        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
             char Abis[2] = {A[X],A[Y]+1};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
         }
         direction = 'H';
-        if(!directionExiste && testChemin(A, carte, nbCases, actuel, (*chemin), direction)){
+        if(!directionExiste && testPosition(A, carte, nbCases, actuel, (*chemin), direction)){
             remplirChemin(A[X], A[Y], (*chemin)[actuel], direction);
             char Abis[2] = {A[X],A[Y]-1};
             calculChemin(Abis, B, carte, nbCases, actuel+1, meilleur, chemin, meilleurChemin);
@@ -152,13 +223,17 @@ void calculChemin(char A[2], char B[2], const Case*** carte, char nbCases[2],
 }
 
 /**
-    Ajoute l'arrete donnee au tableau, a la position
-    correspondante pour garder un tableau ordonne selon
-    la distance des arretes.
-*/
+ * \fn Arrete** trierArretes(Arrete **tab, int nbArretes, Arrete *aRanger)
+ * \brief Fonction de trie des Arrete selon leur distance.
+ *
+ * \param tab Tableau d'Arrete.
+ * \param nbArretes Nombre d'Arrete du tableau.
+ * \param aRanger Arrete à ranger dans le tableau.
+ * \return Retourne le tableau avec la nouvelle Arrete.
+ */
 Arrete** trierArretes(Arrete **tab, int nbArretes, Arrete *aRanger){
     ///memset();
-    short i, j;
+    int i, j;
     for(i = 0 ; i < nbArretes ; i++){
         if(tab[i]==0){
             tab[i] = aRanger;
@@ -181,16 +256,23 @@ Arrete** trierArretes(Arrete **tab, int nbArretes, Arrete *aRanger){
 }
 
 /**
-    Compare le point B d'une premiere arrete avec les points A et B de la seconde.
-    Retourne O pour Oui (1.B = 2.A), I pour Inverse (1.B = 2.B) et N pour Non.
-*/
+ * \fn char comparerArrete(Arrete* premiere, Arrete* deuxieme)
+ * \brief Fonction de comparaison du suivi de deux Arrete.
+ * \brief Compare si le point B de la premiere correspond au point
+ * \brief A de la seconde.
+ *
+ * \param premiere Premiere Arrete à comparer.
+ * \param deuxieme Deuxieme Arrete à comparer.
+ * \return Retourne O si les Arrete se suivent, sinon N.
+ */
 char comparerArrete(Arrete* premiere, Arrete* deuxieme){
     if(premiere->B[0]==deuxieme->A[0] &&
        premiere->B[1]==deuxieme->A[1] ){
-        return 'O'; // O si
+        return 'O';
    } else if(premiere->B[0]==deuxieme->B[0] &&
              premiere->B[1]==deuxieme->B[1] ){
-        return 'I';
+        deuxieme = inverserPoints(deuxieme);
+        return 'O';
    } else {
        return 'N';
    }
@@ -247,9 +329,6 @@ Arrete** trierChemin(Arrete** tab, int nbArretes){
     // et continuer jusqu'a avoir range l'arbre.
     for(i = 1 ; i < nbArretes ; i++){
         for(j = i ; j < nbArretes ; j++){
-            if(comparerArrete(tab[i-1], tab[j])=='I'){
-                inverserPoints(tab[j]); // Inversion pour que le chemin soit toujours A -> B
-            }
             if(comparerArrete(tab[i-1], tab[j])=='O'){
                 Arrete* arreteTemp = tab[i];
                 tab[i] = tab[j];
@@ -296,10 +375,10 @@ Arrete** algorithmeChemin(Joueur *joueur, Ressource **ressources, int nbRessourc
     for(i = 0 ; i < nbRessources ; i++){
         // Ajout de l'arrete avec le joueur
         Arrete* arreteJoueur = newArrete(joueur->position, ressources[i]->position, carte, nbCases);
-        trierArretes(tabArretes, nbArretes, arreteJoueur);
+        tabArretes = trierArretes(tabArretes, nbArretes, arreteJoueur);
         // Ajout de l'arrete avec le point d'arrivee
         Arrete* arreteArrivee = newArrete(ressources[i]->position, joueur->arrivee, carte, nbCases);
-        trierArretes(tabArretes, nbArretes, arreteArrivee);
+        tabArretes = trierArretes(tabArretes, nbArretes, arreteArrivee);
     }
 
     // Ajout des arretes entre ressources
@@ -309,7 +388,7 @@ Arrete** algorithmeChemin(Joueur *joueur, Ressource **ressources, int nbRessourc
         // les autres ressources non parcourues precedemment
         for(j = i+1 ; j < nbRessources ; j++){
             Arrete* arreteRessource = newArrete(ressources[i]->position, ressources[j]->position, carte, nbCases);
-            trierArretes(tabArretes, nbArretes, arreteRessource);
+            tabArretes = trierArretes(tabArretes, nbArretes, arreteRessource);
         }
     }
 
